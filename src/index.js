@@ -5,10 +5,11 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import ProfileView from './ProfileView'
 import IngredientView from "./IngredientView";
+import MyPantryView from "./MyPantryView";
 
 ReactDOM.render(
   <React.StrictMode>
-    <IngredientView/>
+    <MyPantryView/>
   </React.StrictMode>,
   document.getElementById('root')
 );
