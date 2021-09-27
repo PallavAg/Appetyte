@@ -1,6 +1,7 @@
 import React from "react";
 import {useTable} from "react-table";
 
+// Code inspired by https://react-table.tanstack.com/docs/quick-start
 function GenerateTableView() {
     const data = React.useMemo(
         () => [
@@ -43,7 +44,12 @@ function GenerateTableView() {
     } = useTable({ columns, data })
 
     return (
-        <table {...getTableProps()} style={{ border: 'solid 1px blue' }}>
+        <table {...getTableProps()} style={{
+            background: '#ebebeb',
+            padding: '1rem',
+            'border-radius': '15px',
+            width: '750px',
+            }}>
             <thead>
             {headerGroups.map(headerGroup => (
                 <tr {...headerGroup.getHeaderGroupProps()}>
@@ -51,8 +57,8 @@ function GenerateTableView() {
                         <th
                             {...column.getHeaderProps()}
                             style={{
-                                borderBottom: 'solid 3px red',
-                                background: 'aliceblue',
+                                //borderBottom: 'solid 3px red',
+                                //background: 'aliceblue',
                                 color: 'black',
                                 fontWeight: 'bold',
                             }}
@@ -74,8 +80,8 @@ function GenerateTableView() {
                                     {...cell.getCellProps()}
                                     style={{
                                         padding: '10px',
-                                        border: 'solid 1px gray',
-                                        background: 'papayawhip',
+                                        //border: 'solid 1px gray',
+                                        background: 'white',
                                     }}
                                 >
                                     {cell.render('Cell')}

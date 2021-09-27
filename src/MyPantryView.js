@@ -17,7 +17,7 @@ class MyPantryView extends React.Component {
                 <div className='contentInsets'>
                     <div className='pageTitle'>
                         My Pantry
-                        <span style={{padding: 100}} />
+                        <span style={{padding: 255}} />
                         <button>+</button>
                     </div>
                     <div>
