@@ -5,7 +5,11 @@ class NavigationBar extends React.Component {
         return (
             <div className='navigationBar'>
                 <div className='navigationBarContent'>
-                    <label>Appetyte</label>
+                    <label className='homeButton'>Appetyte</label>
+                    <span className='rightJustified'>
+                        <label className='navigationBarText'>Cookbook</label>
+                        <label className='navigationBarText'>My Pantry</label>
+                    </span>
                 </div>
             </div>
         );

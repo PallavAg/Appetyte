@@ -18,6 +18,36 @@ code {
   width: 1rem;
 }
 
+.pageTitle {
+  font-family: -apple-system, Helvetica Neue;
+  font-weight: bold;
+  font-size: 40px;
+  padding-bottom: 1rem;
+}
+
+.pageSubtitle {
+  font-family: "SF Pro Rounded";
+  font-weight: bold;
+  color: grey;
+  font-size: 20px;
+  padding-bottom: 0.5rem;
+}
+
+.pageSubSubtitle {
+  font-family: -apple-system, Helvetica Neue;
+  font-size: 17px;
+  padding-bottom: 0.5rem;
+}
+
+.standardButton {
+  font-family: -apple-system, Helvetica Neue;
+  font-size: 20px;
+  background-color: lightgray;
+  border-width: 0px;
+  border-radius: 7px;
+  padding: 1rem 2rem;
+}
+
 .navigationBar {
   background-color: steelblue;
 }
@@ -26,7 +56,26 @@ code {
   padding: 1rem;
 }
 
+.navigationBarText {
+  font-family: Helvetica;
+  font-size: 20px;
+  color: white;
+  text-align: right;
+}
+
+.homeButton {
+  font-family: Helvetica;
+  font-weight: bold;
+  font-size: 30px;
+  color: white;
+}
+
 .contentInsets {
   padding: 1rem;
+}
+
+.rightJustified {
+  margin-left: auto;
+  margin-right: 0px;
 }
 
