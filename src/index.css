@@ -11,3 +11,22 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.card {
+  background-color: brown;
+  padding: 1rem;
+  width: 1rem;
+}
+
+.navigationBar {
+  background-color: steelblue;
+}
+
+.navigationBarContent {
+  padding: 1rem;
+}
+
+.contentInsets {
+  padding: 1rem;
+}
+
