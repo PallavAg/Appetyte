@@ -4,10 +4,11 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import ProfileView from './ProfileView'
+import IngredientView from "./IngredientView";
 
 ReactDOM.render(
   <React.StrictMode>
-    <ProfileView/>
+    <IngredientView/>
   </React.StrictMode>,
   document.getElementById('root')
 );
