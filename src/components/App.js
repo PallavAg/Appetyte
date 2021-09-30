@@ -7,6 +7,7 @@ import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
 import MyPantryView from "./MyPantryView";
 import ProfileView from './ProfileView'
 import NavigationBar from "./NavigationBar";
+import CreateRecipeView from './CreateRecipeView'
 
 function App() {
 
@@ -16,7 +17,7 @@ function App() {
 				<NavigationBar/>
 				<AuthContextProvider>
 					<Switch>
-						<Route exact path="/" component={MyPantryView}/>
+						<Route exact path="/" component={CreateRecipeView}/>
 						<Route path="/profile" component={ProfileView}/>
 						<Route path="/login" component={SignUpView}/>
 					</Switch>
