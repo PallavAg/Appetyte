@@ -7,20 +7,20 @@ export default function CreateRecipeView() {
 
     const [products, setProducts] = useState(
         [
-            { id: "1", name: "Preheat oven", delete: <Button>Trash Icon</Button> },
-            { id: "2", name: "Preheat oven3", delete: <Button>Trash Icon</Button> },
+            { id: "1", name: addInstructionForm(), delete: <Button>Trash Icon</Button> },
+            { id: "2", name: addInstructionForm(), delete: <Button>Trash Icon</Button> },
         ]
     );
     const [coreIngredients, setCoreIngredients] = useState(
         [
-            { quantity: "1", name: "Chicken", delete: <Button>Trash Icon</Button> },
-            { quantity: "2", name: "Potatoes", delete: <Button>Trash Icon</Button> },
+            { quantity: "1", name: addIngredientForm(), delete: <Button>Trash Icon</Button> },
+            { quantity: "2", name: addIngredientForm(), delete: <Button>Trash Icon</Button> },
         ]
     )
     const [sideIngredients, setSideIngredients] = useState(
         [
-            { quantity: "1", name: "Salt", delete: <Button>Trash Icon</Button> },
-            { quantity: "2", name: "Pepper", delete: <Button>Trash Icon</Button> },
+            { quantity: "1", name: addIngredientForm(), delete: <Button>Trash Icon</Button> },
+            { quantity: "2", name: addIngredientForm(), delete: <Button>Trash Icon</Button> },
         ]
     )
 
@@ -58,6 +58,26 @@ export default function CreateRecipeView() {
         }
     ];
 
+    const rowStyle = (row, rowIndex) => {
+        return 'backgroundColor: red';
+    };
+
+    function addIngredientForm() {
+        return (<Form>
+            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                <Form.Control type="email" placeholder="Ingredient" />
+            </Form.Group>
+        </Form>)
+    }
+
+    function addInstructionForm() {
+        return (<Form>
+            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                <Form.Control type="email" placeholder="Instruction" />
+            </Form.Group>
+        </Form>)
+    }
+
     function addInstructionRow() {
         let index = products.length + 1
         setProducts(products => ([...products, {id: index, name: "New Ingredient", delete: <Button>Trash Icon</Button> }]));
@@ -65,12 +85,12 @@ export default function CreateRecipeView() {
 
     function addCoreIngredientRow() {
         let index = coreIngredients.length + 1
-        setCoreIngredients(coreIngredients => ([...coreIngredients, {id: index, name: "New Ingredient", delete: <Button>Trash Icon</Button> }]));
+        setCoreIngredients(coreIngredients => ([...coreIngredients, {quantity: index, name: addIngredientForm(), delete: <Button>Trash Icon</Button> }]));
     }
 
     function addSideIngredientRow() {
         let index = sideIngredients.length + 1
-        setSideIngredients(sideIngredients => ([...sideIngredients, {id: index, name: "New Ingredient", delete: <Button>Trash Icon</Button> }]));
+        setSideIngredients(sideIngredients => ([...sideIngredients, {quantity: index, name: addIngredientForm(), delete: <Button>Trash Icon</Button> }]));
     }
 
     return (
@@ -82,23 +102,16 @@ export default function CreateRecipeView() {
                 keyField="id"
                 data={coreIngredients}
                 columns={ingredientColumns}
+                bordered={false}
+                containerStyle={{borderRadius: 15}}
+                headerStyle={{borderRadius: 15, backgroundClip: 'border-box'}}
+                trStyle={{borderRadius: 15}}
+                rowStyle={{backgroundColor: '#ebebeb', borderColor: 'white', borderRadius: 15}}
             />
             <div>
-                <Form>
-                    <Row>
-                        <Col>
-                            <Form.Control placeholder='Quantity' />
-                        </Col>
-                        <Col>
-                            <Form.Control placeholder='Name'/>
-                        </Col>
-                        <Col>
-                            <Button onClick={() => addCoreIngredientRow()}>
-                                Add Core Ingredient
-                            </Button>
-                        </Col>
-                    </Row>
-                </Form>
+                <Button onClick={() => addCoreIngredientRow()}>
+                    Add Row
+                </Button>
 
             </div>
             <div className='pageSubtitle'>Side Ingredients</div>
@@ -108,21 +121,9 @@ export default function CreateRecipeView() {
                 data={sideIngredients}
                 columns={ingredientColumns}
             />
-            <Form>
-                <Row>
-                    <Col>
-                        <Form.Control placeholder='Quantity' />
-                    </Col>
-                    <Col>
-                        <Form.Control placeholder='Name'/>
-                    </Col>
-                    <Col>
-                        <Button onClick={() => addSideIngredientRow()}>
-                            Add Side Ingredient
-                        </Button>
-                    </Col>
-                </Row>
-            </Form>
+            <Button onClick={() => addSideIngredientRow()}>
+                Add Row
+            </Button>
             <div className='pageSubtitle'>Instructions</div>
             <BootstrapTable
                 bootstrap4
@@ -140,6 +141,21 @@ export default function CreateRecipeView() {
                     Create
                 </Button>
             </div>
+            {/*<Form>*/}
+            {/*    <Row>*/}
+            {/*        <Col>*/}
+            {/*            <Form.Control placeholder='Quantity' />*/}
+            {/*        </Col>*/}
+            {/*        <Col>*/}
+            {/*            <Form.Control placeholder='Name'/>*/}
+            {/*        </Col>*/}
+            {/*        <Col>*/}
+            {/*            <Button onClick={() => addCoreIngredientRow()}>*/}
+            {/*                Add Core Ingredient*/}
+            {/*            </Button>*/}
+            {/*        </Col>*/}
+            {/*    </Row>*/}
+            {/*</Form>*/}
         </div>
     );
 
