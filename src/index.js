@@ -3,14 +3,11 @@ import ReactDOM from 'react-dom';
 import './components/css/index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import App from './components/App';
-import ProfileView from './components/ProfileView'
-import LoginView from './components/LoginView'
-import IngredientView from "./components/IngredientView";
-import MyPantryView from "./components/MyPantryView";
 
+// Change "<App />" for testing purposes
 ReactDOM.render(
   <React.StrictMode>
-    <MyPantryView/>
+      <App />
   </React.StrictMode>,
   document.getElementById('root')
 );

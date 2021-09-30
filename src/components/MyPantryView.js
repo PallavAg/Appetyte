@@ -1,8 +1,6 @@
 import React from "react";
-import NavigationBar from "./NavigationBar";
 import GenerateTableView from "./GenerateTableView";
 import App from "./App";
-
 
 class MyPantryView extends React.Component {
 
@@ -13,11 +11,10 @@ class MyPantryView extends React.Component {
     render() {
         return (
             <div>
-                <NavigationBar />
                 <div className='contentInsets'>
                     <div className='pageTitle'>
                         My Pantry
-                        <span style={{padding: 255}} />
+                        <span style={{padding: 10}} /* This is blocking the Nav Bar Buttons */ />
                         <button>+</button>
                     </div>
                     <div>
