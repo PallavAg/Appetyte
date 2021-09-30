@@ -25,7 +25,7 @@ class ProfileView extends React.Component {
                         <div className='pageSubtitle'>EMAIL</div>
                         <div className='pageSubSubtitle'>{this.state.email}</div>
                         <div>
-                            <button className='standardButton'>Log Out</button>
+                            <button className='standardButton'>Log In</button>
                         </div>
                     </div>
                 </div>

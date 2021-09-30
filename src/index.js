@@ -1,11 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import ProfileView from './ProfileView'
-import IngredientView from "./IngredientView";
-import MyPantryView from "./MyPantryView";
+import './components/css/index.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import App from './components/App';
+import ProfileView from './components/ProfileView'
+import LoginView from './components/LoginView'
+import IngredientView from "./components/IngredientView";
+import MyPantryView from "./components/MyPantryView";
 
 ReactDOM.render(
   <React.StrictMode>
@@ -13,8 +14,3 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
