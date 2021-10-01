@@ -18,6 +18,7 @@ function App() {
 				<AuthContextProvider>
 					<Switch>
 						<Route exact path="/" component={CreateRecipeView}/>
+						<Route path="/pantry" component={MyPantryView}/>
 						<Route path="/profile" component={ProfileView}/>
 						<Route path="/login" component={SignUpView}/>
 					</Switch>

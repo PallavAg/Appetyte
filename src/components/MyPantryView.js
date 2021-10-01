@@ -1,11 +1,14 @@
-import React from "react";
+import React, {useState} from "react";
 import BootstrapTable from 'react-bootstrap-table-next';
-import { Button } from 'react-bootstrap'
+import { Button } from 'react-bootstrap';
+import { BsFillTrashFill } from 'react-icons/bs';
 import firebase, {auth} from "../firebase";
 
 
 
 export default function MyPantryView() {
+
+    const [error, setError] = useState("");
 
     async function getIngredients() {
 
@@ -19,19 +22,32 @@ export default function MyPantryView() {
 
     }
 
-    const products = [
-        { id: "Chicken", name: "1 week", delete: <Button>Trash Icon {getIngredients}</Button> },
+    const [products, setProducts] = useState([
+    ]);
 
-    ];
+    function setIngredients() {
+        const index = 0;
+        setProducts(products => ([...products, { id: index, name: "Chicken", expiration: "eternal", delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/>}]))
+        //setProducts(products => ([...products, { id: "3", name: "Chicken2", expiration: "eternal", delete: <BsFillTrashFill onClick={deleteIngredient(index+1)}/> }]))
+
+    }
+
+    function deleteIngredient(e, index) {
+        e.preventDefault();
+        // const copyProducts = {...products}
+        // delete copyProducts["Chicken"];
+        setProducts(products => (products.filter(item => item.id !== index)));
+        //setProducts(products => ([...products,  { id: "Chicken2", name: "eternal", delete: <BsFillTrashFill onClick={deleteIngredient}/> }]));
+    }
 
     const columns = [
         {
-            dataField: "id",
+            dataField: "name",
             text: "Ingredient",
             sort: true
         },
         {
-            dataField: "name",
+            dataField: "expiration",
             text: "Expires in",
             sort: true
         },
@@ -55,6 +71,7 @@ export default function MyPantryView() {
                     <span style={{padding: 10}} /* This is blocking the Nav Bar Buttons */ />
                     <button>+</button>
                 </div>
+                <div style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</div>
                 <div>
                     <BootstrapTable
                         bootstrap4
@@ -63,6 +80,7 @@ export default function MyPantryView() {
                         columns={columns}
                     />
                 </div>
+                <button onClick={setIngredients}>delete me</button>
             </div>
         </div>
     );
