@@ -15,29 +15,31 @@ export default function MyPantryView() {
         try {
             let userId = auth.tenantId;
             console.log(userId);
-            firebase.firestore().collection("Users")
+            firebase.firestore().collection("Users").doc(userId).collection("Pantry").get()
         } catch (err) {
             console.log(err.message)
         }
 
     }
 
-    const [products, setProducts] = useState([
-    ]);
+    const [products, setProducts] = useState([]);
 
     function setIngredients() {
         const index = 0;
         setProducts(products => ([...products, { id: index, name: "Chicken", expiration: "eternal", delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/>}]))
-        //setProducts(products => ([...products, { id: "3", name: "Chicken2", expiration: "eternal", delete: <BsFillTrashFill onClick={deleteIngredient(index+1)}/> }]))
-
     }
 
     function deleteIngredient(e, index) {
         e.preventDefault();
-        // const copyProducts = {...products}
-        // delete copyProducts["Chicken"];
-        setProducts(products => (products.filter(item => item.id !== index)));
-        //setProducts(products => ([...products,  { id: "Chicken2", name: "eternal", delete: <BsFillTrashFill onClick={deleteIngredient}/> }]));
+
+        let copy = products.filter(item => item.id !== index)
+
+        for (let i = 0; i < copy.length; i++) {
+            if (copy[i].id > index) {
+                copy[i].id--;
+            }
+        }
+        setProducts(copy);
     }
 
     const columns = [
@@ -80,7 +82,8 @@ export default function MyPantryView() {
                         columns={columns}
                     />
                 </div>
-                <button onClick={setIngredients}>delete me</button>
+                <button onClick={setIngredients}>Remove this button after add ingredient is implemented</button>
+                Note: deleting one ingredient will delete them all since they are all currently created with the same ID
             </div>
         </div>
     );
