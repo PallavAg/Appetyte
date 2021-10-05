@@ -2,7 +2,8 @@ import React, {useState} from "react";
 import BootstrapTable from 'react-bootstrap-table-next';
 import { Button } from 'react-bootstrap';
 import { BsFillTrashFill } from 'react-icons/bs';
-import firebase, {auth} from "../firebase";
+import firebase, {auth, db} from "../firebase";
+//import {update} from "firebase/firebase-database";
 
 
 
@@ -10,12 +11,12 @@ export default function MyPantryView() {
 
     const [error, setError] = useState("");
 
-    async function getIngredients() {
+    function getIngredients() {
 
         try {
             let userId = auth.tenantId;
             console.log(userId);
-            firebase.firestore().collection("Users").doc(userId).collection("Pantry").get()
+            db.collection("Users").doc(auth.currentUser.uid).collection("Pantry").get().then(ingredients => updateIngredients(ingredients));
         } catch (err) {
             console.log(err.message)
         }
@@ -24,22 +25,52 @@ export default function MyPantryView() {
 
     const [products, setProducts] = useState([]);
 
+    function addIngredient(e, name, expiration) {
+        e.preventDefault();
+        if (name ==="" || expiration === "") {
+            return;
+        }
+
+        // DB code
+        let docData = {expiration: expiration};
+        db.collection("Users").doc(auth.currentUser.uid).collection("Pantry").doc(name).set(docData).then(getIngredients);
+    }
+
+    function updateIngredients(ingredients) {
+        let newIngredients = [];
+        let i=0;
+        ingredients.foreach( ingredient =>
+            newIngredients.append(
+                {
+                    id: ingredient.id,
+                    name: ingredient.name,
+                    expiration: ingredient.expiration,
+                    delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, i++)}/>
+                }
+            )
+        );
+        setProducts(newIngredients);
+    }
+
     function setIngredients() {
         const index = 0;
-        setProducts(products => ([...products, { id: index, name: "Chicken", expiration: "eternal", delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/>}]))
+        getIngredients();
+        //setProducts(products => ([...products, { id: index, name: "Chicken", expiration: "eternal", delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/>}]))
     }
 
     function deleteIngredient(e, index) {
         e.preventDefault();
+        let ingredient = products.find(item => item.id === index)
+        db.collection("Users").doc(auth.currentUser.uid).collection("Pantry").doc(ingredient.name).delete().then(getIngredients);
 
-        let copy = products.filter(item => item.id !== index)
-
-        for (let i = 0; i < copy.length; i++) {
-            if (copy[i].id > index) {
-                copy[i].id--;
-            }
-        }
-        setProducts(copy);
+        // let copy = products.filter(item => item.id !== index)
+        //
+        // for (let i = 0; i < copy.length; i++) {
+        //     if (copy[i].id > index) {
+        //         copy[i].id--;
+        //     }
+        // }
+        // setProducts(copy);
     }
 
     const columns = [
@@ -71,7 +102,7 @@ export default function MyPantryView() {
                 <div className='pageTitle'>
                     My Pantry
                     <span style={{padding: 10}} /* This is blocking the Nav Bar Buttons */ />
-                    <button>+</button>
+                    <button onClick={(event) => addIngredient(event, "Apple", "Yes")}>+</button>
                 </div>
                 <div style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</div>
                 <div>
