@@ -4,8 +4,7 @@ import {useHistory} from "react-router-dom";
 
 export default function ProfileView() {
 	const [userName, setUserName] = useState("N/A")
-	const [email, setEmail] = useState("janedoe@example.com")
-	const {currentUser, logout} = useAuth()
+	const {currentUser, logout, uid} = useAuth()
 	const history = useHistory()
 
 	async function handleLogout() {
@@ -17,17 +16,30 @@ export default function ProfileView() {
 		}
 	}
 
+	function ProfileInfo() {
+		if (uid) {
+			return (
+				<div>
+					<div className='pageSubtitle'>USERNAME</div>
+					<div className='pageSubSubtitle'>{userName}</div>
+					<div className='pageSubtitle'>EMAIL</div>
+					<div className='pageSubSubtitle'>{currentUser.email}</div>
+				</div>
+			);
+		} else {
+			return (<></>)
+		}
+	}
+
 	return (
 		<div>
 			<div className='contentInsets'>
 				<div className='pageTitle'>Your Profile</div>
 				<div className='contentInsets'>
-					<div className='pageSubtitle'>USERNAME</div>
-					<div className='pageSubSubtitle'>{userName}</div>
-					<div className='pageSubtitle'>EMAIL</div>
-					<div className='pageSubSubtitle'>{currentUser ? currentUser.email : "Logged Out"}</div>
+					<ProfileInfo/>
 					<div>
-						<button className='standardButton' onClick={handleLogout}>Log Out</button>
+						<button className='standardButton'
+								onClick={handleLogout}>{currentUser ? "Log Out" : "Log In"}</button>
 					</div>
 				</div>
 			</div>

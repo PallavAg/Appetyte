@@ -9,6 +9,7 @@ export function useAuth() {
 
 export function AuthContextProvider({children}) {
 	const [currentUser, setCurrentUser] = useState()
+	const [uid, setUid] = useState()
 	const [loading, setLoading] = useState(true)
 
 	function signup(email, password) {
@@ -27,16 +28,19 @@ export function AuthContextProvider({children}) {
 	useEffect(() => {
 		// When signup() completes, auth changes and calls setCurrentUser()
 		return auth.onAuthStateChanged(user => {
+			setUid(user ? user.uid : null)
 			setCurrentUser(user)
 			setLoading(false)
 		})
 	}, [])
 
 	const value = {
+		uid,
 		currentUser,
 		signup,
 		login,
-		logout
+		logout,
+		setUid
 	}
 
 	return (

@@ -15,8 +15,8 @@ function App() {
 	return (
 		<>
 			<Router>
-				<NavigationBar/>
 				<AuthContextProvider>
+					<NavigationBar/>
 					<Switch>
 						<Route exact path="/" component={CreateRecipeView}/>
 						<Route path="/create_recipe" component={CreateRecipeView}/>

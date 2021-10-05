@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Form, Button, Card, Container, Alert} from 'react-bootstrap'
 import {useAuth} from "../contexts/AuthContext";
 import {useHistory} from "react-router-dom";
@@ -9,8 +9,14 @@ export default function SignUp() {
 	const {signup, login} = useAuth() // Access to Auth functions and variables
 	const [error, setError] = useState("")
 	const [loading, setLoading] = useState(false)
+	const [loggedIn, setloggedIn] = useState(false)
 	const [signingIn, setSigningIn] = useState(true)
 	const history = useHistory()
+
+	// Navigate to profile when logged in successfully
+	useEffect(() => {
+		if (loggedIn) history.push('/profile')
+	},[history, loggedIn]);
 
 	// Runs when the sign up form is submitted
 	async function handleSubmit(e) {
@@ -24,9 +30,9 @@ export default function SignUp() {
 
 		try {
 			if (signingIn) {
-				if (password.length < 4) {
+				if (password.length < 6) {
 					setLoading(false)
-					return setError('Password must be longer than 4 characters')
+					return setError('Password must be at least 6 characters long')
 				}
 
 				// Attempt Sign Up
@@ -34,11 +40,12 @@ export default function SignUp() {
 				setSigningIn(false)
 			} else {
 				// Attempt Log In
-				await login(email, password) // Sign up (located in auth context)
-				history.push("/profile")
+				// Log In (located in auth context)
+				await login(email, password).then(() => {setloggedIn(true)})
 			}
 		} catch (err) {
 			setLoading(false)
+			console.log(err.message)
 			setError(err.message.toString())
 		}
 
@@ -70,9 +77,9 @@ export default function SignUp() {
 						</Card.Body>
 					</Card>
 					<div className="w-100 text-center mt-2">
-						<a class="link-primary" onClick={() => {
+						<Button type="button" className="btn-light btn-link" onClick={() => {
 							setSigningIn(!signingIn)
-						}}>{signingIn ? "Already have an account? Login instead." : "Create an Account"}</a>
+						}}>{signingIn ? "Already have an account? Login instead." : "Create an Account"}</Button>
 					</div>
 				</div>
 			</Container>
