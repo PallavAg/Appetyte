@@ -8,6 +8,7 @@ import MyPantryView from "./MyPantryView";
 import ProfileView from './ProfileView'
 import NavigationBar from "./NavigationBar";
 import CreateRecipeView from './CreateRecipeView'
+import IngredientView from "./IngredientView";
 
 function App() {
 
@@ -22,6 +23,7 @@ function App() {
 						<Route path="/pantry" component={MyPantryView}/>
 						<Route path="/profile" component={ProfileView}/>
 						<Route path="/login" component={SignUpView}/>
+						<Route path="/ingredients" component={IngredientView}/>
 					</Switch>
 				</AuthContextProvider>
 			</Router>
