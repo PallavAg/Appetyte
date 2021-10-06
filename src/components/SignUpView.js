@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {Form, Button, Card, Container, Alert} from 'react-bootstrap'
 import {useAuth} from "../contexts/AuthContext";
 import {useHistory} from "react-router-dom";
+import {toast} from "react-hot-toast";
 
 export default function SignUp() {
 	const emailRef = React.createRef()
@@ -37,11 +38,13 @@ export default function SignUp() {
 
 				// Attempt Sign Up
 				await signup(email, password) // Sign up (located in auth context)
+				toast.success("Sign up successful")
 				setSigningIn(false)
 			} else {
 				// Attempt Log In
 				// Log In (located in auth context)
 				await login(email, password).then(() => {setloggedIn(true)})
+				toast.success("Log in successful")
 			}
 		} catch (err) {
 			setLoading(false)
@@ -78,7 +81,7 @@ export default function SignUp() {
 					</Card>
 					<div className="w-100 text-center mt-2">
 						<Button type="button" className="btn-light btn-link" onClick={() => {
-							setSigningIn(!signingIn)
+							setSigningIn(!signingIn); setError('')
 						}}>{signingIn ? "Already have an account? Login instead." : "Create an Account"}</Button>
 					</div>
 				</div>

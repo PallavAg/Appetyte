@@ -1,17 +1,33 @@
 import React, {useState} from "react";
+import {Button} from 'react-bootstrap'
 import {useAuth} from "../contexts/AuthContext";
 import {useHistory} from "react-router-dom";
+import {toast} from "react-hot-toast";
 
 export default function ProfileView() {
 	const [userName, setUserName] = useState("N/A")
-	const {currentUser, logout, uid} = useAuth()
+	const {currentUser, logout, deleteAccount, uid} = useAuth()
 	const history = useHistory()
 
 	async function handleLogout() {
 		try {
+			let wasLoggedIn = uid
 			await logout()
+			if (wasLoggedIn) toast.success("You have been logged out")
 			history.push("/login")
 		} catch (err) {
+			console.log(err.message)
+		}
+	}
+
+	async function handleDelete() {
+		try {
+			await deleteAccount().then(() => {
+				history.push("/login")
+				toast.success("Account deleted successfully.")
+			})
+		} catch (err) {
+			toast.error("Logout and Log in again to delete account")
 			console.log(err.message)
 		}
 	}
@@ -24,6 +40,7 @@ export default function ProfileView() {
 					<div className='pageSubSubtitle'>{userName}</div>
 					<div className='pageSubtitle'>EMAIL</div>
 					<div className='pageSubSubtitle'>{currentUser.email}</div>
+					<Button className="btn-danger" onClick={handleDelete}>{"Delete Account"}</Button>
 				</div>
 			);
 		} else {
@@ -37,10 +54,8 @@ export default function ProfileView() {
 				<div className='pageTitle'>Your Profile</div>
 				<div className='contentInsets'>
 					<ProfileInfo/>
-					<div>
-						<button className='standardButton'
-								onClick={handleLogout}>{currentUser ? "Log Out" : "Log In"}</button>
-					</div>
+					<br/>
+					<Button className="btn-lg" onClick={handleLogout}>{currentUser ? "Log Out" : "Log In"}</Button>
 				</div>
 			</div>
 		</div>
