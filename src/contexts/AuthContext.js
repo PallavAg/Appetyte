@@ -24,6 +24,10 @@ export function AuthContextProvider({children}) {
 		return auth.signOut()
 	}
 
+	function deleteAccount() {
+		return auth.currentUser?.delete()
+	}
+
 	// Runs only once
 	useEffect(() => {
 		// When signup() completes, auth changes and calls setCurrentUser()
@@ -40,6 +44,7 @@ export function AuthContextProvider({children}) {
 		signup,
 		login,
 		logout,
+		deleteAccount,
 		setUid
 	}
 

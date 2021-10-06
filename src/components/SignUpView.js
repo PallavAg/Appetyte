@@ -2,11 +2,12 @@ import React, {useEffect, useRef, useState} from "react";
 import {Form, Button, Card, Container, Alert} from 'react-bootstrap'
 import {useAuth} from "../contexts/AuthContext";
 import {useHistory} from "react-router-dom";
+import {toast} from "react-hot-toast";
 
 export default function SignUp() {
 	const emailRef = React.createRef()
 	const passwordRef = useRef()
-	const {signup, login} = useAuth() // Access to Auth functions and variables
+	const {signup, login, logout} = useAuth() // Access to Auth functions and variables
 	const [error, setError] = useState("")
 	const [loading, setLoading] = useState(false)
 	const [loggedIn, setloggedIn] = useState(false)
@@ -15,7 +16,7 @@ export default function SignUp() {
 
 	// Navigate to profile when logged in successfully
 	useEffect(() => {
-		if (loggedIn) history.push('/profile')
+		if (loggedIn) history.push('/')
 	},[history, loggedIn]);
 
 	// Runs when the sign up form is submitted
@@ -36,16 +37,34 @@ export default function SignUp() {
 				}
 
 				// Attempt Sign Up
-				await signup(email, password) // Sign up (located in auth context)
+				// Sign up (located in auth context)
+				await signup(email, password).then((user) => {
+					// Send verification email
+					logout()
+					user.user.sendEmailVerification().then(() => {
+						window.localStorage.setItem('emailForSignIn', email);
+						toast.success("Email sent. Verify email to login.")
+					}).catch((error) => {
+						toast.success("Unable to send verification email")
+						console.log(error)
+					})
+				})
 				setSigningIn(false)
 			} else {
 				// Attempt Log In
 				// Log In (located in auth context)
-				await login(email, password).then(() => {setloggedIn(true)})
+				await login(email, password).then((user) => {
+					if (user.user.emailVerified) {
+						setloggedIn(true)
+						toast.success("Logged In Successfully!")
+					} else {
+						logout()
+						toast.error("You need to verify your email before logging in")
+					}
+				})
 			}
 		} catch (err) {
 			setLoading(false)
-			console.log(err.message)
 			setError(err.message.toString())
 		}
 
@@ -78,7 +97,7 @@ export default function SignUp() {
 					</Card>
 					<div className="w-100 text-center mt-2">
 						<Button type="button" className="btn-light btn-link" onClick={() => {
-							setSigningIn(!signingIn)
+							setSigningIn(!signingIn); setError('')
 						}}>{signingIn ? "Already have an account? Login instead." : "Create an Account"}</Button>
 					</div>
 				</div>

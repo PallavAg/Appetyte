@@ -4,18 +4,21 @@ import React from "react";
 import SignUpView from "./SignUpView";
 import {AuthContextProvider} from "../contexts/AuthContext";
 import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
+import toast, { Toaster } from 'react-hot-toast';
 import MyPantryView from "./MyPantryView";
 import ProfileView from './ProfileView'
 import NavigationBar from "./NavigationBar";
 import CreateRecipeView from './CreateRecipeView'
 import IngredientView from "./IngredientView";
 
+// Make sure everything is within <AuthContextProvider>
 function App() {
 
 	return (
 		<>
 			<Router>
 				<AuthContextProvider>
+					<Toaster />
 					<NavigationBar/>
 					<Switch>
 						<Route exact path="/" component={CreateRecipeView}/>

@@ -1,18 +1,21 @@
-import React, {useEffect, useState} from "react";
+import React, {useState, useEffect} from "react";
 import BootstrapTable from 'react-bootstrap-table-next';
 import {Button, Form, Row, Col} from "react-bootstrap";
 import { BsFillTrashFill } from 'react-icons/bs';
 import firebase, {auth, db} from "../firebase";
 import {useAuth} from "../contexts/AuthContext";
-//import {update} from "firebase/firebase-database";
-
+import { doc, getDoc, collection, query, getDocs } from "firebase/firestore";
+import {getFirestore} from "firebase/firestore";
+import {initializeApp} from "firebase/app";
+ 
 
 
 export default function MyPantryView() {
     const {uid} = useAuth();
     const [error, setError] = useState("");
-    const [products, setProducts] = useState([]);
     const [futureIngredient, setFutureIngredient] = useState({name: "", expiration: ""});
+    const [ingredientNames, setIngredientNames] = useState([]);
+    const [ingredientExpirations, setIngredientExpirations] = useState([]);
 
     useEffect(()=>{
         getIngredients();
@@ -29,18 +32,29 @@ export default function MyPantryView() {
     }
 
     function getIngredients() {
-        db.collection("Users").doc(uid).collection("Pantry").get().then(ingredients => updateIngredients(ingredients.docs));
+        if (uid === null) {
+            setError("You must be logged in to set and see your ingredients!");
+            return;
+        }
+        db.collection("Users").doc(uid).collection("Pantry").get().then(ingredients => updateIngredients(ingredients.docs), e => setError(e.message));
         try {
             let userId = auth.tenantId;
 
         } catch (err) {
-            console.log(err.message)
+            setError(err.message);
+            console.log(err.message);
         }
     }
 
 
     function addIngredient(e, name, expiration) {
         e.preventDefault();
+
+        if (uid === null) {
+            setError("You must be logged in to set and see your ingredients!");
+            return;
+        }
+
         if (name === "") {
             setError("Your ingredient needs a name!");
             return;
@@ -53,15 +67,12 @@ export default function MyPantryView() {
 
         // DB code
         let docData = {expiration: expiration};
-        db.collection("Users").doc(uid).collection("Pantry").doc(name).set(docData).then(getIngredients, onError);
-    }
-
-    function onError(e) {
-        setError(e.message);
+        db.collection("Users").doc(uid).collection("Pantry").doc(name).set(docData).then(getIngredients, e => setError(e.message));
     }
 
     function updateIngredients(ingredients) {
         let newIngredients = [];
+        let newExpirations = [];
         ingredients.forEach( (ingredient, index) => {
             newIngredients.push(
                 {
@@ -73,14 +84,8 @@ export default function MyPantryView() {
             );
             }
         );
-        console.log("Updating Ingredients");
-        setProducts(newIngredients);
-    }
-
-    function setIngredients() {
-        const index = 0;
-        getIngredients();
-        //setProducts(products => ([...products, { id: index, name: "Chicken", expiration: "eternal", delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/>}]))
+        setIngredientNames(newIngredients);
+        setIngredientExpirations(newExpirations);
     }
 
     function deleteIngredient(e, id) {
@@ -89,6 +94,10 @@ export default function MyPantryView() {
         // let ingredient = products.find(item => item.id === index);
         // console.log(products);
         // console.log(ingredient);
+        if (uid === null) {
+            setError("You must be logged in to set and see your ingredients!");
+            return;
+        }
         db.collection("Users").doc(uid).collection("Pantry").doc(id).delete().then(getIngredients);
     }
 
@@ -153,11 +162,11 @@ export default function MyPantryView() {
                     <BootstrapTable
                         bootstrap4
                         keyField="id"
-                        data={products}
+                        data={ingredientNames}
                         columns={columns}
                     />
                 </div>
-                {/*<button onClick={setIngredients}>Remove this button after add ingredient is implemented</button>*/}
+                {/*<button onClick={setIngredientNames}>Remove this button after add ingredient is implemented</button>*/}
                 {/*Note: deleting one ingredient will delete them all since they are all currently created with the same ID*/}
             </div>
         </div>
