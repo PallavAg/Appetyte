@@ -297,21 +297,9 @@ export default function CreateRecipeView() {
             return;
         }
 
-        // TODO: CHECK SAME NUMBER OF QUANTITIES AND NAMES AND THAT BOTH ARE FILLED IN WITH SAME INDEX
-
         // Check that there is at least one ingredient
         if (Object.keys(coreIngredientNames).length == 0 && Object.keys(sideIngredientNames).length == 0) {
             setError("Your recipe must contain at least one ingredient.");
-            return;
-        }
-
-        if (Object.keys(coreIngredientQuantities).length != Object.keys(coreIngredientNames).length) {
-            setError("Please make sure all core ingredients have both an ingredient and a quantity.")
-            return;
-        }
-
-        if (Object.keys(sideIngredientQuantities).length != Object.keys(sideIngredientNames).length) {
-            setError("Please make sure all side ingredients have both an ingredient and a quantity.")
             return;
         }
 
@@ -327,23 +315,29 @@ export default function CreateRecipeView() {
         // Save recipe core ingredients
         let coreIngredients = []
         for (let i = 0; i < Object.keys(coreIngredientNames).length; i++) {
-            if (!(i in coreIngredientNames) || (coreIngredientNames[i] === "") || !(i in coreIngredientQuantities) || (coreIngredientQuantities[i] === "")) {
-                setError("Please make sure all core ingredients have both an ingredient and a quantity.")
-                return;
+            const bothEmpty = (coreIngredientNames["i"] === "" && coreIngredientQuantities["i"] === ""); // To compensate for lack of delete button
+            if (!bothEmpty) {
+                if (!(i in coreIngredientNames) || (coreIngredientNames[i] === "") || !(i in coreIngredientQuantities) || (coreIngredientQuantities[i] === "")) {
+                    setError("Please make sure all core ingredients have both an ingredient and a quantity.");
+                    return;
+                }
+                let ingredient = {name: coreIngredientNames[i], quantity: coreIngredientQuantities[i]};
+                coreIngredients.push(ingredient);
             }
-            let ingredient = {name: coreIngredientNames[i], quantity: coreIngredientQuantities[i]};
-            coreIngredients.push(ingredient);
         }
 
         // Save recipe side ingredients
         let sideIngredients = []
         for (let i = 0; i < Object.keys(sideIngredientNames).length; i++) {
-            if (!(i in sideIngredientNames) || !(i in sideIngredientQuantities)) {
-                setError("Please make sure all core ingredients have both an ingredient and a quantity.")
-                return;
+            const bothEmpty = (sideIngredientNames["i"] === "" && sideIngredientQuantities["i"] === ""); // To compensate for lack of delete button
+            if (!bothEmpty) {
+                if (!(i in sideIngredientNames) || !(i in sideIngredientQuantities)) {
+                    setError("Please make sure all side ingredients have both an ingredient and a quantity.")
+                    return;
+                }
+                let ingredient = {name: sideIngredientNames[i], quantity: sideIngredientQuantities[i]};
+                sideIngredients.push(ingredient);
             }
-            let ingredient = {name: sideIngredientNames[i], quantity: sideIngredientQuantities[i]};
-            sideIngredients.push(ingredient);
         }
 
         // Save is recipe public toggle
