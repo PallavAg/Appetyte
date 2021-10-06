@@ -47,10 +47,10 @@ export default function CreateRecipeView() {
             text: "",
             sort: true
         },
-        {
-            dataField: "delete",
-            text: ""
-        }
+        // {
+        //     dataField: "delete",
+        //     text: ""
+        // }
     ];
 
     const columns = [
@@ -64,10 +64,10 @@ export default function CreateRecipeView() {
             text: "",
             sort: true
         },
-        {
-            dataField: "delete",
-            text: ""
-        }
+        // {
+        //     dataField: "delete",
+        //     text: ""
+        // }
     ];
 
     // Yeah this function is kinda wack....
@@ -245,6 +245,8 @@ export default function CreateRecipeView() {
                 keyField="id"
                 data={sideIngredientForms}
                 columns={ingredientColumns}
+                bordered={false}
+                rowStyle={{backgroundColor: '#ebebeb', borderColor: 'white'}}
             />
             <div className='leftContentInsets'>
                 <Button onClick={() => addSideIngredientRow()}>
@@ -257,6 +259,8 @@ export default function CreateRecipeView() {
                 keyField="id"
                 data={instructionForms}
                 columns={columns}
+                bordered={false}
+                rowStyle={{backgroundColor: '#ebebeb', borderColor: 'white'}}
             />
             <div className='leftContentInsets'><Button onClick={() => addInstructionRow()}>
                 Add Step
