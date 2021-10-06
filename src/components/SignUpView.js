@@ -68,7 +68,6 @@ export default function SignUp() {
 						setLoggedIn(true)
 						toast.success("Logged In Successfully!")
 						// Have to put here since user isn't logged in until verified
-						createUser(getUnverifiedUID());
 					} else {
 						logout()
 						toast.error("You need to verify your email before logging in")
@@ -90,7 +89,6 @@ export default function SignUp() {
 			return;
 		}
 
-		const userRef = collection(db, "Users");
 		await setDoc(doc(db, "Users", unverifiedUID), {
 			firstName: "",
 			lastName: "",
