@@ -3,20 +3,20 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import { Button } from 'react-bootstrap';
 import { BsFillTrashFill } from 'react-icons/bs';
 import firebase, {auth, db} from "../firebase";
+import {useAuth} from "../contexts/AuthContext";
 //import {update} from "firebase/firebase-database";
 
 
 
 export default function MyPantryView() {
-
+    const {uid} = useAuth();
     const [error, setError] = useState("");
 
     function getIngredients() {
-
         try {
             let userId = auth.tenantId;
             console.log(userId);
-            db.collection("Users").doc(auth.currentUser.uid).collection("Pantry").get().then(ingredients => updateIngredients(ingredients));
+            db.collection("Users").doc(uid).collection("Pantry").get().then(ingredients => updateIngredients(ingredients));
         } catch (err) {
             console.log(err.message)
         }
@@ -33,22 +33,25 @@ export default function MyPantryView() {
 
         // DB code
         let docData = {expiration: expiration};
-        db.collection("Users").doc(auth.currentUser.uid).collection("Pantry").doc(name).set(docData).then(getIngredients);
+        db.collection("Users").doc(uid).collection("Pantry").doc(name).set(docData).then(getIngredients);
     }
 
     function updateIngredients(ingredients) {
         let newIngredients = [];
         let i=0;
-        ingredients.foreach( ingredient =>
-            newIngredients.append(
-                {
-                    id: ingredient.id,
-                    name: ingredient.name,
-                    expiration: ingredient.expiration,
-                    delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, i++)}/>
-                }
-            )
+        ingredients.forEach( ingredient => {
+                console.log(ingredient)
+                newIngredients.push(
+                    {
+                        id: i,
+                        name: ingredient.id,
+                        expiration: ingredient.data().expiration,
+                        delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, i++)}/>
+                    }
+                )
+            }
         );
+        console.log(ingredients);
         setProducts(newIngredients);
     }
 
@@ -61,7 +64,7 @@ export default function MyPantryView() {
     function deleteIngredient(e, index) {
         e.preventDefault();
         let ingredient = products.find(item => item.id === index)
-        db.collection("Users").doc(auth.currentUser.uid).collection("Pantry").doc(ingredient.name).delete().then(getIngredients);
+        db.collection("Users").doc(uid).collection("Pantry").doc(ingredient.name).delete().then(getIngredients);
 
         // let copy = products.filter(item => item.id !== index)
         //
