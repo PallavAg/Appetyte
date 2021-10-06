@@ -21,14 +21,17 @@ export default function ProfileView() {
 	}
 
 	async function handleDelete() {
-		try {
-			await deleteAccount().then(() => {
-				history.push("/login")
-				toast.success("Account deleted successfully.")
-			})
-		} catch (err) {
-			toast.error("Logout and Log in again to delete account")
-			console.log(err.message)
+		if (window.confirm("Are you sure you want to delete your account and data?")) {
+			try {
+				//await db.firestore().collection("Users").doc(uid).delete()
+				await deleteAccount().then(() => {
+					history.push("/login")
+					toast.success("Account deleted successfully.")
+				})
+			} catch (err) {
+				toast.error("Logout and Log in again to delete account")
+				console.log(err.message)
+			}
 		}
 	}
 

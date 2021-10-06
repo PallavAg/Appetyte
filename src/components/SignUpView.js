@@ -7,7 +7,7 @@ import {toast} from "react-hot-toast";
 export default function SignUp() {
 	const emailRef = React.createRef()
 	const passwordRef = useRef()
-	const {signup, login} = useAuth() // Access to Auth functions and variables
+	const {signup, login, logout} = useAuth() // Access to Auth functions and variables
 	const [error, setError] = useState("")
 	const [loading, setLoading] = useState(false)
 	const [loggedIn, setloggedIn] = useState(false)
@@ -16,7 +16,7 @@ export default function SignUp() {
 
 	// Navigate to profile when logged in successfully
 	useEffect(() => {
-		if (loggedIn) history.push('/profile')
+		if (loggedIn) history.push('/')
 	},[history, loggedIn]);
 
 	// Runs when the sign up form is submitted
@@ -37,18 +37,34 @@ export default function SignUp() {
 				}
 
 				// Attempt Sign Up
-				await signup(email, password) // Sign up (located in auth context)
-				toast.success("Sign up successful")
+				// Sign up (located in auth context)
+				await signup(email, password).then((user) => {
+					// Send verification email
+					logout()
+					user.user.sendEmailVerification().then(() => {
+						window.localStorage.setItem('emailForSignIn', email);
+						toast.success("Email sent. Verify email to login.")
+					}).catch((error) => {
+						toast.success("Unable to send verification email")
+						console.log(error)
+					})
+				})
 				setSigningIn(false)
 			} else {
 				// Attempt Log In
 				// Log In (located in auth context)
-				await login(email, password).then(() => {setloggedIn(true)})
-				toast.success("Log in successful")
+				await login(email, password).then((user) => {
+					if (user.user.emailVerified) {
+						setloggedIn(true)
+						toast.success("Logged In Successfully!")
+					} else {
+						logout()
+						toast.error("You need to verify your email before logging in")
+					}
+				})
 			}
 		} catch (err) {
 			setLoading(false)
-			console.log(err.message)
 			setError(err.message.toString())
 		}
 

@@ -13,8 +13,7 @@ export default function NavigationBar() {
 				<Nav className="me-auto">
 					<Nav.Link as={Link} to="/ingredients">Ingredients</Nav.Link>
 					<Nav.Link as={Link} to="/pantry">My Pantry</Nav.Link>
-					<Nav.Link as={Link} to="/profile">{uid ? " Profile " : ""}</Nav.Link>
-					<Nav.Link as={Link} to="/login">{uid ? "" : "Login"}</Nav.Link>
+					<Nav.Link as={Link} to={uid ? "/profile" : "/login"}>{uid ? "Profile" : "Login"}</Nav.Link>
 				</Nav>
 			</Navbar>
 		</div>
