@@ -3,11 +3,13 @@ import {Form, Button, Card, Container, Alert} from 'react-bootstrap'
 import {useAuth} from "../contexts/AuthContext";
 import {useHistory} from "react-router-dom";
 import {toast} from "react-hot-toast";
+import {initializeApp} from "firebase/app";
+import {getFirestore, doc, setDoc, collection} from "firebase/firestore";
 
 export default function SignUp() {
 	const emailRef = React.createRef()
 	const passwordRef = useRef()
-	const {signup, login, logout} = useAuth() // Access to Auth functions and variables
+	const {signup, login, logout, uid, currentUser, getUnverifiedUID} = useAuth() // Access to Auth functions and variables
 	const [error, setError] = useState("")
 	const [loading, setLoading] = useState(false)
 	const [loggedIn, setloggedIn] = useState(false)
@@ -40,7 +42,7 @@ export default function SignUp() {
 				// Sign up (located in auth context)
 				await signup(email, password).then((user) => {
 					// Send verification email
-					logout()
+					createUser(getUnverifiedUID());
 					user.user.sendEmailVerification().then(() => {
 						window.localStorage.setItem('emailForSignIn', email);
 						toast.success("Email sent. Verify email to login.")
@@ -57,6 +59,8 @@ export default function SignUp() {
 					if (user.user.emailVerified) {
 						setloggedIn(true)
 						toast.success("Logged In Successfully!")
+						// Have to put here since user isn't logged in until verified
+						createUser();
 					} else {
 						logout()
 						toast.error("You need to verify your email before logging in")
@@ -69,6 +73,37 @@ export default function SignUp() {
 		}
 
 		setLoading(false)
+	}
+
+	async function createUser() {
+		if (!uid) {
+			// User is logged out yet somehow this was called
+			return;
+		}
+
+		// TODO: Remove this
+		const firebaseConfig = {
+			apiKey: "AIzaSyCqsDGSsqBVbApAf86ypvwLxP0qAmgH1-I",
+			authDomain: "appetyte-7a6f6.firebaseapp.com",
+			projectId: "appetyte-7a6f6",
+			storageBucket: "appetyte-7a6f6.appspot.com",
+			messagingSenderId: "470203778412",
+			appId: "1:470203778412:web:5a5f9976d8081213a01f49",
+			measurementId: "G-E8RDH36LL3"
+		};
+
+		const app = initializeApp(firebaseConfig);
+		const db = getFirestore(app);
+
+		const userRef = collection(db, "Users");
+		await setDoc(doc(db, "Users", uid), {
+			firstName: "",
+			lastName: "",
+			username: "",
+		});
+
+		logout()
+
 	}
 
 	return (

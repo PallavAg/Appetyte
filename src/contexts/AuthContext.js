@@ -24,6 +24,13 @@ export function AuthContextProvider({children}) {
 		return auth.signOut()
 	}
 
+	function getUnverifiedUID() {
+		// To be used when signing up before user is verified
+		// Nothing changes about uid after verification, but the
+		// user's uid object just won't be set at this point
+		return auth.currentUser.uid;
+	}
+
 	function deleteAccount() {
 		return auth.currentUser?.delete()
 	}
@@ -45,7 +52,8 @@ export function AuthContextProvider({children}) {
 		login,
 		logout,
 		deleteAccount,
-		setUid
+		setUid,
+		getUnverifiedUID
 	}
 
 	return (
