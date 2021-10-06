@@ -7,7 +7,7 @@ import {useAuth} from "../contexts/AuthContext";
 
 export default function IngredientView() {
 
-    const {uid, getUnverifiedUID} = useAuth();
+    const {uid} = useAuth();
 
     const [error, setError] = useState("");
 

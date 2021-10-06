@@ -2,10 +2,14 @@ import React, {useRef, useState} from "react";
 import {Button, Form, Row, Col} from "react-bootstrap";
 import Switch from "react-switch";
 import BootstrapTable from "react-bootstrap-table-next";
-import firebase from "../firebase";
+import firebase, {db} from "../firebase";
 import {BsFillTrashFill} from "react-icons/bs";
+import {collection, addDoc} from "firebase/firestore";
+import {useAuth} from "../contexts/AuthContext";
 
 export default function CreateRecipeView() {
+
+    const {uid} = useAuth();
 
     const [coreIngredientNames, setCoreIngredientNames] = useState({})
     const [coreIngredientQuantities, setCoreIngredientQuantities] = useState({})
@@ -66,39 +70,38 @@ export default function CreateRecipeView() {
         }
     ];
 
-
+    // Yeah this function is kinda wack....
     // whichList: 0 -> coreIngredientNames
     //            1 -> coreIngredientQuantities
     //            2 -> sideIngredientNames
     //            3 -> sideIngredientQuantities
     //            4 -> instructions
     const setField = (field, value, id, whichList) => {
-        let copy = {};
         switch (whichList) {
             case 0:
-                copy = {...coreIngredientNames}
-                copy[id] = value;
-                setCoreIngredientNames(copy);
+                const copy1 = coreIngredientNames;
+                copy1[id] = value;
+                setCoreIngredientNames(copy1);
                 break;
             case 1:
-                copy = {...coreIngredientQuantities}
-                copy[id] = value;
-                setCoreIngredientQuantities(copy);
+                const copy2 = coreIngredientQuantities;
+                copy2[id] = value;
+                setCoreIngredientQuantities(copy2);
                 break;
             case 2:
-                copy = {...sideIngredientNames}
-                copy[id] = value;
-                setSideIngredientNames(copy);
+                const copy3 = sideIngredientNames;
+                copy3[id] = value;
+                setSideIngredientNames(copy3);
                 break;
             case 3:
-                copy = {...sideIngredientQuantities}
-                copy[id] = value;
-                setSideIngredientQuantities(copy);
+                const copy4 = sideIngredientQuantities;
+                copy4[id] = value;
+                setSideIngredientQuantities(copy4);
                 break;
             case 4:
-                copy = {...instructions}
-                copy[id] = value;
-                setInstructions(copy);
+                const copy5 = instructions;
+                copy5[id] = value;
+                setInstructions(copy5);
                 break;
             default:
                 break;
@@ -112,7 +115,6 @@ export default function CreateRecipeView() {
                 <Form.Control
                     type="name"
                     placeholder={"Ingredient"}
-                    //id={id}
                     onChange={e => setField('name', e.target.value, id, 0)}
                 />
             </Form.Group>
@@ -186,18 +188,18 @@ export default function CreateRecipeView() {
     }
 
     function addInstructionRow() {
-        let index = instructionForms.length + 1
+        let index = instructionForms.length
         setInstructionForms(products => ([...products, {id: index, name: addInstructionForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
     }
 
     function addCoreIngredientRow() {
-        let index = coreIngredientForms.length + 1
-        setCoreIngredientForms(coreIngredients => ([...coreIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
+        let index = coreIngredientForms.length
+        setCoreIngredientForms(coreIngredients => ([...coreIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
     }
 
     function addSideIngredientRow() {
-        let index = sideIngredientForms.length + 1
-        setSideIngredientForms(sideIngredients => ([...sideIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
+        let index = sideIngredientForms.length
+        setSideIngredientForms(sideIngredients => ([...sideIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
     }
 
     const toggleSwitch = (value) => {
@@ -206,7 +208,7 @@ export default function CreateRecipeView() {
         //State changes according to switch
     };
 
-    const recipeName = useRef();
+    let recipeName = useRef();
     const [notes, setNotes] = useState("");
 
     const [switchValue, setSwitchValue] = useState(true);
@@ -216,7 +218,7 @@ export default function CreateRecipeView() {
         <div className='contentInsets'>
             <div className='pageTitle'>Create Recipe</div>
             <div className='pageSubtitle'>Recipe Name</div>
-            <div><Form><Form.Control size='lg' placeholder='Recipe Name' ref={recipeName}></Form.Control></Form></div>
+            <div><Form><Form.Control size='lg' placeholder='Recipe Name' ref={(ref) => {recipeName = ref}}></Form.Control></Form></div>
             <div className='pageSubtitle'>Core Ingredients</div>
             <BootstrapTable
                 bootstrap4
@@ -285,12 +287,8 @@ export default function CreateRecipeView() {
 
     async function createRecipe() {
 
-        setError(notes);
-        //setError(Object.keys(myIngredients).length);
-        return;
-
         // Check that it has a name
-        if (recipeName == "") {
+        if (recipeName.value == "") {
             setError("You must provide a name for your recipe.");
             return;
         }
@@ -298,23 +296,23 @@ export default function CreateRecipeView() {
         // TODO: CHECK SAME NUMBER OF QUANTITIES AND NAMES AND THAT BOTH ARE FILLED IN WITH SAME INDEX
 
         // Check that there is at least one ingredient
-        if (coreIngredientNames.current.length == 0 && sideIngredientNames.current.length == 0) {
+        if (Object.keys(coreIngredientNames).length == 0 && Object.keys(sideIngredientNames).length == 0) {
             setError("Your recipe must contain at least one ingredient.");
             return;
         }
 
-        if (coreIngredientQuantities.current.length != coreIngredientNames.current.length) {
+        if (Object.keys(coreIngredientQuantities).length != Object.keys(coreIngredientNames).length) {
             setError("Please make sure all core ingredients have both an ingredient and a quantity.")
-        } else {
-            // TODO: Check that ingredient and quantities are paired up
+            return;
         }
 
-        if (sideIngredientQuantities.current.length != sideIngredientNames.current.length) {
+        if (Object.keys(sideIngredientQuantities).length != Object.keys(sideIngredientNames).length) {
             setError("Please make sure all side ingredients have both an ingredient and a quantity.")
+            return;
         }
 
         // Check that there is at least on instruction
-        if (instructions.current.length == 0) {
+        if (Object.keys(instructions).length == 0) {
             setError("You must provide at least one instruction for your recipe.");
             return;
         }
@@ -322,51 +320,53 @@ export default function CreateRecipeView() {
         // No errors
         setError("")
 
-        var recipe = []
-
-        // Save recipe name
-        recipe["name"] = recipeName;
-
         // Save recipe core ingredients
         let coreIngredients = []
-        for (let i = 0; i < coreIngredientNames.length; i++) {
-            let ingredient = {name: coreIngredientNames[i].name, quantity: coreIngredientQuantities[i].quantity};
-            coreIngredientNames.push(ingredient);
+        for (let i = 0; i < Object.keys(coreIngredientNames).length; i++) {
+            if (!(i in coreIngredientNames) || (coreIngredientNames[i] === "") || !(i in coreIngredientQuantities) || (coreIngredientQuantities[i] === "")) {
+                setError("Please make sure all core ingredients have both an ingredient and a quantity.")
+                return;
+            }
+            let ingredient = {name: coreIngredientNames[i], quantity: coreIngredientQuantities[i]};
+            coreIngredients.push(ingredient);
         }
-        recipe["coreIngredients"] = coreIngredients;
 
         // Save recipe side ingredients
         let sideIngredients = []
-        for (let i = 0; i < sideIngredientNames.length; i++) {
-            let ingredient = {name: sideIngredientNames[i].name, quantity: sideIngredientQuantities[i].quantity};
-            sideIngredientNames.push(ingredient);
+        for (let i = 0; i < Object.keys(sideIngredientNames).length; i++) {
+            if (!(i in sideIngredientNames) || !(i in sideIngredientQuantities)) {
+                setError("Please make sure all core ingredients have both an ingredient and a quantity.")
+                return;
+            }
+            let ingredient = {name: sideIngredientNames[i], quantity: sideIngredientQuantities[i]};
+            sideIngredients.push(ingredient);
         }
-        recipe["sideIngredients"] = sideIngredients;
-
-        // Save recipe notes
-        recipe["blurb"] = notes;
 
         // Save is recipe public toggle
+        let recipeType = "";
         if (switchValue == 0) {
-            recipe["RecipeType"] = "Private"
+            recipeType = "Private"
         }
         else if (switchValue == 1) {
-            recipe["RecipeType"] = "Public";
+            recipeType = "Public";
         }
 
-        // Save recipe author id
-        // TODO: Set to use userID
-        recipe["author"] = "TEST -- NEEDS TO BE SET TO USER ID"
-
-        // Set upvote and downvotes to 0
-        recipe["upvoteCount"] = 0;
-        recipe["downvoteCount"] = 0;
+        const recipe = {
+            name: recipeName.value,
+            coreIngredients: coreIngredients,
+            sideIngredients: coreIngredients,
+            author: uid,
+            upvoteCount: 0,
+            downvoteCount: 0,
+            recipeType: recipeType,
+            blurb: notes,
+        }
 
         // Add recipe to database
-        // TODO: Update userID
-        //firebase.firestore().collection("Users").doc("USER ID").collection("CreatedRecipes").add(recipe)
-        //const result = await setDoc(doc(db, "Users", "USER ID", "CreatedRecipes"), recipe);
-        // TODO: Check result for errors
+        let recipeRef = collection(db, "Users", uid, "CreatedRecipes");
+        const docRef = await addDoc(recipeRef, recipe)
+
+        setError(docRef.id);
     }
 
 }
