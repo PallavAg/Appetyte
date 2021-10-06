@@ -68,7 +68,7 @@ export default function SignUp() {
 						setLoggedIn(true)
 						toast.success("Logged In Successfully!")
 						// Have to put here since user isn't logged in until verified
-						createUser();
+						createUser(getUnverifiedUID());
 					} else {
 						logout()
 						toast.error("You need to verify your email before logging in")
@@ -83,15 +83,15 @@ export default function SignUp() {
 		setLoading(false)
 	}
 
-	async function createUser()
+	async function createUser(unverifiedUID)
 	{
-		if (!uid) {
+		if (!unverifiedUID) {
 			// User is logged out yet somehow this was called
 			return;
 		}
 
 		const userRef = collection(db, "Users");
-		await setDoc(doc(db, "Users", uid), {
+		await setDoc(doc(db, "Users", unverifiedUID), {
 			firstName: "",
 			lastName: "",
 			username: "",
