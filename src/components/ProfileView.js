@@ -7,6 +7,8 @@ import {db} from "../firebase";
 
 export default function ProfileView() {
 	const [userName, setUserName] = useState("Loading...")
+	const [firstName, setFirstName] = useState("Loading...")
+	const [lastName, setLastName] = useState("Loading...")
 	const {currentUser, logout, deleteAccount, uid} = useAuth()
 	const history = useHistory()
 
@@ -46,6 +48,12 @@ export default function ProfileView() {
 			db.collection("Users").doc(uid).get().then((doc) => {
 				setUserName(doc.data().username)
 			})
+			db.collection("Users").doc(uid).get().then((doc) => {
+				setFirstName(doc.data().firstName)
+			})
+			db.collection("Users").doc(uid).get().then((doc) => {
+				setLastName(doc.data().lastName)
+			})
 		}
 	})
 
@@ -53,6 +61,8 @@ export default function ProfileView() {
 		if (uid) {
 			return (
 				<div>
+					<div className='pageSubtitle'>NAME</div>
+					<div className='pageSubSubtitle'>{firstName + " " + lastName}</div>
 					<div className='pageSubtitle'>USERNAME</div>
 					<div className='pageSubSubtitle'>{userName}</div>
 					<div className='pageSubtitle'>EMAIL</div>
