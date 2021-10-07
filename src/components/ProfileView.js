@@ -1,11 +1,12 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Button} from 'react-bootstrap'
 import {useAuth} from "../contexts/AuthContext";
 import {useHistory} from "react-router-dom";
 import {toast} from "react-hot-toast";
+import {db} from "../firebase";
 
 export default function ProfileView() {
-	const [userName, setUserName] = useState("N/A")
+	const [userName, setUserName] = useState("Loading...")
 	const {currentUser, logout, deleteAccount, uid} = useAuth()
 	const history = useHistory()
 
@@ -23,7 +24,10 @@ export default function ProfileView() {
 	async function handleDelete() {
 		if (window.confirm("Are you sure you want to delete your account and data?")) {
 			try {
-				//await db.firestore().collection("Users").doc(uid).delete()
+				// Delete from firestore
+				await db.collection("Users").doc(uid).delete()
+
+				// Delete from firebase auth
 				await deleteAccount().then(() => {
 					history.push("/login")
 					toast.success("Account deleted successfully.")
@@ -34,6 +38,16 @@ export default function ProfileView() {
 			}
 		}
 	}
+
+	// Grab username from firebase and show on screen
+	// This block of code runs once when the page is loaded.
+	useEffect(() => {
+		if (uid) {
+			db.collection("Users").doc(uid).get().then((doc) => {
+				setUserName(doc.data().username)
+			})
+		}
+	})
 
 	function ProfileInfo() {
 		if (uid) {

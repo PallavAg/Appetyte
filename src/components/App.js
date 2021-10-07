@@ -4,7 +4,7 @@ import React from "react";
 import SignUpView from "./SignUpView";
 import {AuthContextProvider} from "../contexts/AuthContext";
 import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
-import toast, { Toaster } from 'react-hot-toast';
+import {Toaster} from 'react-hot-toast';
 import MyPantryView from "./MyPantryView";
 import ProfileView from './ProfileView'
 import NavigationBar from "./NavigationBar";
@@ -18,7 +18,7 @@ function App() {
 		<>
 			<Router>
 				<AuthContextProvider>
-					<Toaster />
+					<Toaster/>
 					<NavigationBar/>
 					<Switch>
 						<Route exact path="/" component={CreateRecipeView}/>

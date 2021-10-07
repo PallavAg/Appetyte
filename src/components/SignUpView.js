@@ -3,8 +3,7 @@ import {Form, Button, Card, Container, Alert} from 'react-bootstrap'
 import {useAuth} from "../contexts/AuthContext";
 import {useHistory} from "react-router-dom";
 import {toast} from "react-hot-toast";
-import {initializeApp} from "firebase/app";
-import {getFirestore, doc, setDoc, collection} from "firebase/firestore";
+import {doc, setDoc} from "firebase/firestore";
 import {db} from "../firebase";
 
 export default function SignUp() {
@@ -84,15 +83,12 @@ export default function SignUp() {
 
 	async function createUser(unverifiedUID)
 	{
-		if (!unverifiedUID) {
-			// User is logged out yet somehow this was called
-			return;
-		}
+		if (!unverifiedUID) return; // User is logged out yet somehow this was called
 
 		await setDoc(doc(db, "Users", unverifiedUID), {
-			firstName: "",
-			lastName: "",
-			username: "",
+			firstName: "SampleFirstName",
+			lastName: "SampleLastName",
+			username: "SampleUserName",
 		});
 
 		logout()
