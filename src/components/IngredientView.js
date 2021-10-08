@@ -18,7 +18,7 @@ export default function IngredientView() {
         // TODO: Will need to modify slightly based on if viewing your created, saved, or just public recipe
         const recipeCollection = "CreatedRecipes";
         const recipeId = "test_recipe";
-        const recipeSnapshot = await getDoc(doc(db, "Users", uid, recipeCollection, recipeId));
+        const recipeSnapshot = await getDoc(doc(db, "Users", "b0QnIS4JuHe57ByG7eA7gbpDXcd2", recipeCollection, recipeId));
         if (recipeSnapshot.exists) {
             const core = recipeSnapshot.data()["coreIngredients"];
             const side = recipeSnapshot.data()["sideIngredients"];
