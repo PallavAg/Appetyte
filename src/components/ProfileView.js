@@ -26,13 +26,12 @@ export default function ProfileView() {
 	async function handleDelete() {
 		if (window.confirm("Are you sure you want to delete your account and data?")) {
 			try {
-				// Delete from firestore
-				await db.collection("Users").doc(uid).delete()
-
 				// Delete from firebase auth
 				await deleteAccount().then(() => {
 					history.push("/login")
 					toast.success("Account deleted successfully.")
+					// Delete from firestore
+					db.collection("Users").doc(uid).delete()
 				})
 			} catch (err) {
 				toast.error("Logout and Log in again to delete account")
@@ -46,13 +45,11 @@ export default function ProfileView() {
 	useEffect(() => {
 		if (uid) {
 			db.collection("Users").doc(uid).get().then((doc) => {
-				setUserName(doc.data().username)
-			})
-			db.collection("Users").doc(uid).get().then((doc) => {
-				setFirstName(doc.data().firstName)
-			})
-			db.collection("Users").doc(uid).get().then((doc) => {
-				setLastName(doc.data().lastName)
+				if (doc.exists) {
+					setUserName(doc.data().username)
+					setFirstName(doc.data().firstName)
+					setLastName(doc.data().lastName)
+				}
 			})
 		}
 	})
