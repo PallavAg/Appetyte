@@ -9,7 +9,8 @@ import MyPantryView from "./MyPantryView";
 import ProfileView from './ProfileView'
 import NavigationBar from "./NavigationBar";
 import CreateRecipeView from './CreateRecipeView'
-import IngredientView from "./IngredientView";
+import IngredientView from "./Subviews/IngredientView";
+import SearchPage from "./SearchPage";
 
 // Make sure everything is within <AuthContextProvider>
 function App() {
@@ -27,6 +28,7 @@ function App() {
 						<Route path="/profile" component={ProfileView}/>
 						<Route path="/login" component={SignUpView}/>
 						<Route path="/ingredients" component={IngredientView}/>
+						<Route path="/search" component={SearchPage}/>
 					</Switch>
 				</AuthContextProvider>
 			</Router>

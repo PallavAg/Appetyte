@@ -18,6 +18,13 @@ code {
   border-radius: 15px;
 }
 
+.smallCard {
+  background-color: #ebebeb;
+  padding: 0.1rem;
+  border-radius: 15px;
+}
+
+
 .pageTitle {
   font-family: -apple-system, Helvetica Neue;
   font-weight: bold;

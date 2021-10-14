@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {doc, getDoc} from "firebase/firestore";
-import firebase, {db} from "../firebase";
+import firebase, {db} from "../../firebase";
 import Collapsible from "react-collapsible";
-import {useAuth} from "../contexts/AuthContext";
+import {useAuth} from "../../contexts/AuthContext";
 
 
 export default function IngredientView() {
