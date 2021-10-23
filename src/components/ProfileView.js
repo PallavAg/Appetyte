@@ -4,6 +4,7 @@ import {useAuth} from "../contexts/AuthContext";
 import {useHistory} from "react-router-dom";
 import {toast} from "react-hot-toast";
 import {db} from "../firebase";
+import {addDoc, collection} from "firebase/firestore";
 
 export default function ProfileView() {
 	const [userName, setUserName] = useState("Loading...")
@@ -40,6 +41,15 @@ export default function ProfileView() {
 		}
 	}
 
+	function submitFeedback() {
+		const feedback = prompt("Submit feedback or suggestions anonymously: ");
+		if (feedback.length !== 0) {
+			addDoc(collection(db, "Feedback"), { feedback: feedback }).then(() => {
+				toast.success("Feedback submitted!")
+			});
+		}
+	}
+
 	// Grab username from firebase and show on screen
 	// This block of code runs once when the page is loaded.
 	useEffect(() => {
@@ -64,6 +74,9 @@ export default function ProfileView() {
 					<div className='pageSubSubtitle'>{userName}</div>
 					<div className='pageSubtitle'>EMAIL</div>
 					<div className='pageSubSubtitle'>{currentUser.email}</div>
+					<div style={{'margin-bottom': 10}}>
+						<Button className="btn btn-secondary" onClick={submitFeedback}>{"Submit Feedback"}</Button>
+					</div>
 					<Button className="btn-danger" onClick={handleDelete}>{"Delete Account"}</Button>
 				</div>
 			);
