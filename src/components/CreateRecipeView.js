@@ -209,6 +209,7 @@ export default function CreateRecipeView() {
     };
 
     let recipeName = useRef();
+    const [tags, setTags] = useState("");
     const [notes, setNotes] = useState("");
 
     const [switchValue, setSwitchValue] = useState(true);
@@ -218,7 +219,7 @@ export default function CreateRecipeView() {
         <div className='contentInsets'>
             <div className='pageTitle'>Create Recipe</div>
             <div className='pageSubtitle'>Recipe Name</div>
-            <div><Form><Form.Control size='lg' placeholder='Recipe Name' ref={(ref) => {recipeName = ref}}></Form.Control></Form></div>
+            <div style={{paddingRight: '50%'}}><Form><Form.Control size='lg' placeholder='Recipe Name' ref={(ref) => {recipeName = ref}}/></Form></div>
             <div className='pageSubtitle'>Core Ingredients</div>
             <BootstrapTable
                 bootstrap4
@@ -231,7 +232,7 @@ export default function CreateRecipeView() {
                 trStyle={{borderRadius: 15}}
                 rowStyle={{backgroundColor: '#ebebeb', borderColor: 'white', borderRadius: 15}}
                 bodyStyle={{borderRadius: 15}}
-                tableStyle={{borderRadius: 15, bacgroundColor: 'green'}}
+                tableStyle={{borderRadius: 15, backgroundColor: 'green'}}
             />
             <div className='leftContentInsets'>
                 <Button onClick={() => addCoreIngredientRow()}>
@@ -266,8 +267,11 @@ export default function CreateRecipeView() {
                 Add Step
             </Button></div>
 
+            <div className='pageSubtitle'>Tags</div>
+            <div style={{paddingRight: '50%'}}><Form><Form.Control size='lg' placeholder='Enter up to 5 comma seperated tags' onChange={e => setTags(e.target.value)}/></Form></div>
+
             <div className='pageSubtitle'>Other Information</div>
-            <div style={{paddingLeft: '1rem', paddingRight: '1rem'}}><Form><Form.Control as='textarea' placeholder='Notes' rows='4' onChange={e =>  setNotes(e.target.value)}></Form.Control></Form></div>
+            <div style={{paddingRight: '50%'}}><Form><Form.Control as='textarea' placeholder='Notes' rows='4' onChange={e => setNotes(e.target.value)}/></Form></div>
 
             <div style={{marginTop: "1.5rem"}}>
                 <label style={{fontSize: 22, paddingRight: '10px', verticalAlign: 'top'}}>Is Public</label>
@@ -292,20 +296,25 @@ export default function CreateRecipeView() {
     async function createRecipe() {
 
         // Check that it has a name
-        if (recipeName.value == "") {
+        if (recipeName.value === "") {
             setError("You must provide a name for your recipe.");
             return;
         }
 
         // Check that there is at least one ingredient
-        if (Object.keys(coreIngredientNames).length == 0 && Object.keys(sideIngredientNames).length == 0) {
+        if (Object.keys(coreIngredientNames).length === 0 && Object.keys(sideIngredientNames).length === 0) {
             setError("Your recipe must contain at least one ingredient.");
             return;
         }
 
         // Check that there is at least on instruction
-        if (Object.keys(instructions).length == 0) {
+        if (Object.keys(instructions).length === 0) {
             setError("You must provide at least one instruction for your recipe.");
+            return;
+        }
+
+        if (tags.split(",").length > 5) {
+            setError(`You are limited to 5 tags. You currently have ${tags.split(",").length}.`);
             return;
         }
 
@@ -340,23 +349,15 @@ export default function CreateRecipeView() {
             }
         }
 
-        // Save is recipe public toggle
-        let recipeType = "";
-        if (switchValue == 0) {
-            recipeType = "Private"
-        }
-        else if (switchValue == 1) {
-            recipeType = "Public";
-        }
-
         const recipe = {
             name: recipeName.value,
             coreIngredients: coreIngredients,
-            sideIngredients: coreIngredients,
+            sideIngredients: sideIngredients,
             author: uid,
             upvoteCount: 0,
             downvoteCount: 0,
-            recipeType: recipeType,
+            recipeType: switchValue ? "Public" : "Private",
+            tags: tags.split(','),
             blurb: notes,
         }
 
