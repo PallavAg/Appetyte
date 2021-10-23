@@ -216,11 +216,12 @@ export default function CreateRecipeView() {
     const [error, setError] = useState("");
 
     return (
-        <div className='contentInsets'>
+        <div className='contentInsets' style={{paddingRight: '50%'}}>
             <div className='pageTitle'>Create Recipe</div>
             <div className='pageSubtitle'>Recipe Name</div>
-            <div style={{paddingRight: '50%'}}><Form><Form.Control size='lg' placeholder='Recipe Name' ref={(ref) => {recipeName = ref}}/></Form></div>
-            <div className='pageSubtitle'>Core Ingredients</div>
+            <div><Form><Form.Control size='lg' placeholder='Recipe Name' ref={(ref) => {recipeName = ref}}/></Form></div>
+            <br/>
+			<div className='pageSubtitle'>Core Ingredients</div>
             <BootstrapTable
                 bootstrap4
                 keyField="id"
@@ -234,12 +235,13 @@ export default function CreateRecipeView() {
                 bodyStyle={{borderRadius: 15}}
                 tableStyle={{borderRadius: 15, backgroundColor: 'green'}}
             />
-            <div className='leftContentInsets'>
+            <div>
                 <Button onClick={() => addCoreIngredientRow()}>
                     Add Row
                 </Button>
-
             </div>
+			<br/>
+
             <div className='pageSubtitle'>Side Ingredients</div>
             <BootstrapTable
                 bootstrap4
@@ -249,11 +251,13 @@ export default function CreateRecipeView() {
                 bordered={false}
                 rowStyle={{backgroundColor: '#ebebeb', borderColor: 'white'}}
             />
-            <div className='leftContentInsets'>
+            <div>
                 <Button onClick={() => addSideIngredientRow()}>
                     Add Row
                 </Button>
             </div>
+			<br/>
+
             <div className='pageSubtitle'>Instructions</div>
             <BootstrapTable
                 bootstrap4
@@ -263,15 +267,16 @@ export default function CreateRecipeView() {
                 bordered={false}
                 rowStyle={{backgroundColor: '#ebebeb', borderColor: 'white'}}
             />
-            <div className='leftContentInsets'><Button onClick={() => addInstructionRow()}>
+            <div ><Button onClick={() => addInstructionRow()}>
                 Add Step
             </Button></div>
+			<br/>
 
             <div className='pageSubtitle'>Tags</div>
-            <div style={{paddingRight: '50%'}}><Form><Form.Control size='lg' placeholder='Enter up to 5 comma seperated tags' onChange={e => setTags(e.target.value)}/></Form></div>
+            <div><Form><Form.Control size='lg' placeholder='Enter up to 5 comma seperated tags' onChange={e => setTags(e.target.value)}/></Form></div>
 
             <div className='pageSubtitle'>Other Information</div>
-            <div style={{paddingRight: '50%'}}><Form><Form.Control as='textarea' placeholder='Notes' rows='4' onChange={e => setNotes(e.target.value)}/></Form></div>
+            <div><Form><Form.Control as='textarea' placeholder='Notes' rows='4' onChange={e => setNotes(e.target.value)}/></Form></div>
 
             <div style={{marginTop: "1.5rem"}}>
                 <label style={{fontSize: 22, paddingRight: '10px', verticalAlign: 'top'}}>Is Public</label>
