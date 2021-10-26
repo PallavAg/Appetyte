@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import RecipePreviewCard from "./Subviews/RecipePreviewCard";
 import {Container, Button, Form, Row, Col} from "react-bootstrap";
 import { SegmentedControl } from 'segmented-control'
@@ -6,44 +6,131 @@ import {db} from "../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore"
 
 const SearchType = {
-    NAME: 0,
-    INGREDIENTS_IN_MY_PANTRY: 1,
-    INGREDIENTS: 2
+    INGREDIENTS_IN_MY_PANTRY: 0,
+    INGREDIENTS: 1,
+    NAME: 2,
+
 }
 
 export default function SearchPage() {
 
     const [segmentedCtrlState, setSegmentedCtrlState] = useState(0);
 
-    async function searchForRecipe(searchQuery, containsOnlySelectedIngredients = false) {
+    const [recipes, setRecipes] = useState([]);
+
+    const searchQuery = useRef("");
+
+    function updateResults() {
+
+        const items = recipes.map((recipe) =>
+            <div style={{paddingLeft: '1rem', paddingRight: '1rem'}}>
+                {RecipePreviewCard(recipe.name, recipe.coreIngredients)}
+            </div>
+        );
+        return items;
+
+    }
+
+    async function searchForRecipe(e) {
+        e.preventDefault();
+
         const recipesRef = collection(db, "Recipes");
 
-        var recipes = []
+        var tempRecipes = []
 
-        if (segmentedCtrlState == SearchType.INGREDIENTS_IN_MY_PANTRY) {
+        // if (searchQuery === "") {
+        //     setRecipes(tempRecipes);
+        //     return;
+        // }
+
+        const q = query(recipesRef, where("recipeType", "==", "Public"))
+        const querySnapshot = await getDocs(q);
+
+        if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY) {
             // Searching by ingredients in their pantry
 
-            const q1 = query(recipesRef, where(searchQuery, "in", "coreIngredients"))
-            const q2 = query(recipesRef, where(searchQuery, "in", "sideIngredients"))
+            let pantryIngredients = [];
+            // TODO: Actually get pantry ingredients
+            // TODO: Make pantry ingredients lowercased
 
-            // Merge into single collection removing duplicates
+            let alreadyAdded = false;
 
-            // Remove any recipes that have ingredients that aren't in the pantry
-
-        }
-        else if (segmentedCtrlState == SearchType.INGREDIENTS) {
             // Searching by ingredients
+            querySnapshot.forEach((doc) => {
+                const name = doc.data()["name"];
+                const coreIngredients = doc.data()["coreIngredients"];
+                const sideIngredients = doc.data()["sideIngredients"];
 
-            const q1 = query(recipesRef, where(searchQuery, "in", "coreIngredients"))
-            const q2 = query(recipesRef, where(searchQuery, "in", "sideIngredients"))
+                // Create array of names.
+                for (let i = 0; i < coreIngredients.length; i++) {
 
-            // Merge into single collection removing duplicates
+                    const coreMatch = (ingredient) => coreIngredients[i].name.toLowerCase().includes(ingredient);
+                    if (pantryIngredients.some(coreMatch)) {
+                        tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+
+                        alreadyAdded = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyAdded) {
+                    // We didn't already match a core ingredient
+                    for (let i = 0; i < sideIngredients.length; i++) {
+                        const sideMatch = (ingredient) => sideIngredients[i].name.toLowerCase().includes(ingredient);
+                        if (pantryIngredients.some(sideMatch)) {
+                            tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                        }
+                    }
+                }
+            });
 
         }
-        else if (segmentedCtrlState == SearchType.NAME) {
+        else if (segmentedCtrlState === SearchType.INGREDIENTS) {
+            // TODO: Space separate and comma separate ingredients!
+            // TODO: Make an acceptance criteria for this?
+
+            let ingredients = [searchQuery.current.value.toLowerCase()];
+            let alreadyAdded = false;
+
+            // Searching by ingredients
+            querySnapshot.forEach((doc) => {
+                const name = doc.data()["name"];
+                const coreIngredients = doc.data()["coreIngredients"];
+                const sideIngredients = doc.data()["sideIngredients"];
+                for (let i = 0; i < coreIngredients.length; i++) {
+                    const coreMatch = (ingredient) => coreIngredients[i].name.toLowerCase().includes(ingredient);
+                    if (ingredients.some(coreMatch)) {
+                        tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+
+                        alreadyAdded = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyAdded) {
+                    // We didn't already match a core ingredient
+                    for (let i = 0; i < sideIngredients.length; i++) {
+                        const sideMatch = (ingredient) => sideIngredients[i].name.toLowerCase().includes(ingredient);
+                        if (ingredients.some(sideMatch)) {
+                            tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                        }
+                    }
+                }
+
+
+            });
+
+        }
+        else if (segmentedCtrlState === SearchType.NAME) {
             // Searching by name
-            const q = query(recipesRef, where(searchQuery, "in", "recipeName"))
-            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                let name = doc.data()["name"];
+                let coreIngredients = doc.data()["coreIngredients"];
+                if (name.toLowerCase().includes(searchQuery.current.value.toLowerCase())) {
+                    tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                }
+
+            });
 
         }
 
@@ -51,14 +138,20 @@ export default function SearchPage() {
 
         // Check if should only search for recipes in my cookbook
 
+        //setTestRecipeName(recipes[0])
+        setRecipes(tempRecipes);
 
-        return recipes
     }
+
+    useEffect(() => {
+        //searchForRecipe()
+    });
 
     return (
         <div className='contentInsets'>
             <div className='pageTitle'>Search Recipes</div>
             <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
+                <div>{JSON.stringify(recipes)}</div>
                 <Container>
                     <Row>
                         <Col style={{color: 'white', textAlign: 'right', verticalAlign: 'bottom', lineHeight: 4, fontWeight: 'bold', fontSize: 17}}>
@@ -70,7 +163,7 @@ export default function SearchPage() {
                                 options={[
                                     { label: "Ingredients in My Pantry", value: 0, default: true },
                                     { label: "Any Ingredients", value: 1 },
-                                    { label: "Name", value: 2 },
+                                    { label: "Name", value: 2},
                                 ]}
                                 setValue={newValue => setSegmentedCtrlState(newValue)}
                                 style={{ width: 600, height: 45, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
@@ -87,12 +180,13 @@ export default function SearchPage() {
                                 <Form.Control
                                     type="name"
                                     placeholder={"Search"}
+                                    ref={searchQuery}
                                     //id={id}
                                     //onChange={e => setField('name', e.target.value, id, 3)}
                                 />
                             </Col>
                             <Col md="auto">
-                                <Button style={{borderRadius: 5, color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}}>Search</Button>
+                                <Button style={{borderRadius: 5, color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}} onClick={e => searchForRecipe(e)}>Search</Button>
                             </Col>
                         </Row>
 
@@ -108,8 +202,7 @@ export default function SearchPage() {
             <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', paddingBottom: '1rem'}}>
 
                 <div style={{paddingLeft: '1rem', paddingRight: '1rem'}}>{RecipePreviewCard("Turducken", [{name: "Turkey"}, {name: "Duck"}, {name: "Chicken"}, {name: "Chicken2"}, {name: "Chicken3"}, {name: "Chicken4"}])}</div>
-
-
+                <div>{updateResults()}</div>
             </div>
 
         </div>
