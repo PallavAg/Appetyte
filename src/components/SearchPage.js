@@ -4,6 +4,7 @@ import {Container, Button, Form, Row, Col} from "react-bootstrap";
 import { SegmentedControl } from 'segmented-control'
 import {db} from "../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore"
+import {useAuth} from "../contexts/AuthContext"
 
 const SearchType = {
     INGREDIENTS_IN_MY_PANTRY: 0,
@@ -19,6 +20,8 @@ export default function SearchPage() {
     const [recipes, setRecipes] = useState([]);
 
     const searchQuery = useRef("");
+
+    const {uid} = useAuth();
 
     function updateResults() {
 
@@ -36,18 +39,25 @@ export default function SearchPage() {
 
         const recipesRef = collection(db, "Recipes");
 
-        var tempRecipes = []
+        var tempRecipes = [];
 
         // if (searchQuery === "") {
         //     setRecipes(tempRecipes);
         //     return;
         // }
 
-        const q = query(recipesRef, where("recipeType", "==", "Public"))
+        const q = query(recipesRef, where("recipeType", "==", "Public"));
         const querySnapshot = await getDocs(q);
 
         if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY) {
             // Searching by ingredients in their pantry
+
+            const pantryQ = query(collection(db, "Users", uid, "Pantry"));
+            const pantryQuerySnapshot = await getDocs(pantryQ);
+
+            pantryQuerySnapshot.forEach((doc) => {
+                const name = doc.data()["name"];
+            });
 
             let pantryIngredients = [];
             // TODO: Actually get pantry ingredients

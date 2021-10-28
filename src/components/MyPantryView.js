@@ -66,8 +66,8 @@ export default function MyPantryView() {
         setError("");
 
         // DB code
-        let docData = {expiration: expiration};
-        db.collection("Users").doc(uid).collection("Pantry").doc(name).set(docData).then(getIngredients, e => setError(e.message));
+        let docData = {name: name, expiration: expiration};
+        db.collection("Users").doc(uid).collection("Pantry").add(docData).then(getIngredients, e => setError(e.message));
     }
 
     function updateIngredients(ingredients) {
@@ -77,7 +77,7 @@ export default function MyPantryView() {
             newIngredients.push(
                 {
                     id: index,
-                    name: ingredient.id,
+                    name: ingredient.data().name,
                     expiration: ingredient.data().expiration,
                     delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, ingredient.id)}/>
                 }
