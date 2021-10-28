@@ -18,6 +18,10 @@ export default function SearchPage() {
     const [segmentedCtrlState, setSegmentedCtrlState] = useState(0);
 
     const [recipes, setRecipes] = useState([]);
+    const [tableLabel, setTableLabel] = useState("");
+
+    // TODO: DELETE THIS
+    const [testOutput, setTestOutput] = useState("");
 
     const searchQuery = useRef("");
 
@@ -41,27 +45,32 @@ export default function SearchPage() {
 
         var tempRecipes = [];
 
-        // if (searchQuery === "") {
-        //     setRecipes(tempRecipes);
-        //     return;
-        // }
+        if (searchQuery.current.value === "" && segmentedCtrlState !== SearchType.INGREDIENTS_IN_MY_PANTRY) {
+            setRecipes(tempRecipes);
+            setTableLabel("Please enter search text");
+            return;
+        }
 
         const q = query(recipesRef, where("recipeType", "==", "Public"));
         const querySnapshot = await getDocs(q);
 
         if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY) {
+
             // Searching by ingredients in their pantry
 
             const pantryQ = query(collection(db, "Users", uid, "Pantry"));
             const pantryQuerySnapshot = await getDocs(pantryQ);
 
-            pantryQuerySnapshot.forEach((doc) => {
-                const name = doc.data()["name"];
-            });
-
             let pantryIngredients = [];
-            // TODO: Actually get pantry ingredients
-            // TODO: Make pantry ingredients lowercased
+            let pantryIngredientNames = [];
+
+            pantryQuerySnapshot.forEach((doc) => {
+                let name = doc.data()["name"];
+                const expiration = doc.data()["expiration"];
+                pantryIngredientNames.push(name.toLowerCase());
+                // Adding map array with expiration date in case that can be used later to filter search query
+                pantryIngredients.push({name: name.toLowerCase(), expiration: expiration});
+            });
 
             let alreadyAdded = false;
 
@@ -75,7 +84,7 @@ export default function SearchPage() {
                 for (let i = 0; i < coreIngredients.length; i++) {
 
                     const coreMatch = (ingredient) => coreIngredients[i].name.toLowerCase().includes(ingredient);
-                    if (pantryIngredients.some(coreMatch)) {
+                    if (pantryIngredientNames.some(coreMatch)) {
                         tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
 
                         alreadyAdded = true;
@@ -87,7 +96,7 @@ export default function SearchPage() {
                     // We didn't already match a core ingredient
                     for (let i = 0; i < sideIngredients.length; i++) {
                         const sideMatch = (ingredient) => sideIngredients[i].name.toLowerCase().includes(ingredient);
-                        if (pantryIngredients.some(sideMatch)) {
+                        if (pantryIngredientNames.some(sideMatch)) {
                             tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
                         }
                     }
@@ -149,6 +158,9 @@ export default function SearchPage() {
         // Check if should only search for recipes in my cookbook
 
         //setTestRecipeName(recipes[0])
+        if (tempRecipes.length === 0) {
+            setTableLabel("No Results");
+        }
         setRecipes(tempRecipes);
 
     }
@@ -161,7 +173,7 @@ export default function SearchPage() {
         <div className='contentInsets'>
             <div className='pageTitle'>Search Recipes</div>
             <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
-                <div>{JSON.stringify(recipes)}</div>
+                <div>{JSON.stringify(testOutput)}</div>
                 <Container>
                     <Row>
                         <Col style={{color: 'white', textAlign: 'right', verticalAlign: 'bottom', lineHeight: 4, fontWeight: 'bold', fontSize: 17}}>
@@ -210,8 +222,8 @@ export default function SearchPage() {
                 </Form>
             </div>
             <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', paddingBottom: '1rem'}}>
-
-                <div style={{paddingLeft: '1rem', paddingRight: '1rem'}}>{RecipePreviewCard("Turducken", [{name: "Turkey"}, {name: "Duck"}, {name: "Chicken"}, {name: "Chicken2"}, {name: "Chicken3"}, {name: "Chicken4"}])}</div>
+                <div style={{textAlign: 'center', fontSize: 20}}>{tableLabel}</div>
+                {/*<div style={{paddingLeft: '1rem', paddingRight: '1rem'}}>{RecipePreviewCard("Turducken", [{name: "Turkey"}, {name: "Duck"}, {name: "Chicken"}, {name: "Chicken2"}, {name: "Chicken3"}, {name: "Chicken4"}])}</div>*/}
                 <div>{updateResults()}</div>
             </div>
 
