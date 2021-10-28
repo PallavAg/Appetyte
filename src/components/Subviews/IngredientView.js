@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {doc, getDoc} from "firebase/firestore";
-import firebase, {db} from "../firebase";
+import firebase, {db} from "../../firebase";
 import Collapsible from "react-collapsible";
-import {useAuth} from "../contexts/AuthContext";
+import {useAuth} from "../../contexts/AuthContext";
 
 
 export default function IngredientView() {
@@ -18,7 +18,7 @@ export default function IngredientView() {
         // TODO: Will need to modify slightly based on if viewing your created, saved, or just public recipe
         const recipeCollection = "CreatedRecipes";
         const recipeId = "test_recipe";
-        const recipeSnapshot = await getDoc(doc(db, "Users", uid, recipeCollection, recipeId));
+        const recipeSnapshot = await getDoc(doc(db, "Users", "b0QnIS4JuHe57ByG7eA7gbpDXcd2", recipeCollection, recipeId));
         if (recipeSnapshot.exists) {
             const core = recipeSnapshot.data()["coreIngredients"];
             const side = recipeSnapshot.data()["sideIngredients"];
