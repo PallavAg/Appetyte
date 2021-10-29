@@ -20,12 +20,15 @@ export default function SearchPage() {
     const [recipes, setRecipes] = useState([]);
     const [tableLabel, setTableLabel] = useState("");
 
+    const [segmentedControlHeight, setSegmentedControlHeight] = useState(45);
+    const [segmentedBorderWidth, setSegmentedBorderWidth] = useState(4);
+
     // TODO: DELETE THIS
     const [testOutput, setTestOutput] = useState("");
 
     const searchQuery = useRef("");
 
-    const {uid} = useAuth();
+    const {uid, getUnverifiedUID} = useAuth();
 
     function updateResults() {
 
@@ -165,6 +168,33 @@ export default function SearchPage() {
 
     }
 
+    function ShowLoggedOutSearch() {
+        if (uid !== null) {
+            setSegmentedControlHeight(45);
+            setSegmentedBorderWidth(4);
+            return "Search By";
+        } else {
+            // I'm doing it this weird way because I can't interact with a segmented control when
+            //     it's generated conditional for some reason.
+            setSegmentedControlHeight(0);
+            setSegmentedBorderWidth(0);
+            return "Search by Name";
+        }
+    }
+
+    function ShowSearchOptions() {
+        if (uid !== null) {
+            return <Form className='leftContentInsets'>
+                <Form.Group className="mb-3" controlId="formBasicCheckbox" style={{color: 'white'}}>
+                    <Form.Check type="checkbox" label="Can contain ingredients not my in pantry" />
+                    <Form.Check type="checkbox" label="Show only recipes in my cookbook" />
+                </Form.Group>
+            </Form>
+        } else {
+            return <div></div>
+        }
+    }
+
     useEffect(() => {
         //searchForRecipe()
     });
@@ -175,9 +205,11 @@ export default function SearchPage() {
             <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
                 <div>{JSON.stringify(testOutput)}</div>
                 <Container>
+                    <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
+                        <ShowLoggedOutSearch/>
+                    </div>
                     <Row>
-                        <Col style={{color: 'white', textAlign: 'right', verticalAlign: 'bottom', lineHeight: 4, fontWeight: 'bold', fontSize: 17}}>
-                            Search by:
+                        <Col >
                         </Col>
                         <Col>
                             <SegmentedControl // Using container in order to center the segmented control
@@ -188,7 +220,7 @@ export default function SearchPage() {
                                     { label: "Name", value: 2},
                                 ]}
                                 setValue={newValue => setSegmentedCtrlState(newValue)}
-                                style={{ width: 600, height: 45, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
+                                style={{ width: 600, height: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: segmentedBorderWidth, borderRadius: '15px', fontSize: 15}} // purple400
                             />
                         </Col>
                         <Col>
@@ -214,12 +246,7 @@ export default function SearchPage() {
 
                     </Form.Group>
                 </Form>
-                <Form className='leftContentInsets'>
-                    <Form.Group className="mb-3" controlId="formBasicCheckbox" style={{color: 'white'}}>
-                        <Form.Check type="checkbox" label="Can contain ingredients not my in pantry" />
-                        <Form.Check type="checkbox" label="Show only recipes in my cookbook" />
-                    </Form.Group>
-                </Form>
+                <ShowSearchOptions/>
             </div>
             <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', paddingBottom: '1rem'}}>
                 <div style={{textAlign: 'center', fontSize: 20}}>{tableLabel}</div>

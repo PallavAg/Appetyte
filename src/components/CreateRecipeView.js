@@ -292,19 +292,19 @@ export default function CreateRecipeView() {
     async function createRecipe() {
 
         // Check that it has a name
-        if (recipeName.value == "") {
+        if (recipeName.value === "") {
             setError("You must provide a name for your recipe.");
             return;
         }
 
         // Check that there is at least one ingredient
-        if (Object.keys(coreIngredientNames).length == 0 && Object.keys(sideIngredientNames).length == 0) {
+        if (Object.keys(coreIngredientNames).length === 0 && Object.keys(sideIngredientNames).length === 0) {
             setError("Your recipe must contain at least one ingredient.");
             return;
         }
 
         // Check that there is at least on instruction
-        if (Object.keys(instructions).length == 0) {
+        if (Object.keys(instructions).length === 0) {
             setError("You must provide at least one instruction for your recipe.");
             return;
         }
