@@ -14,6 +14,7 @@ export default function NavigationBar() {
 					<Nav.Link as={Link} to="/create_recipe">Create Recipe</Nav.Link>
 					<Nav.Link as={Link} to="/ingredients">Ingredients</Nav.Link>
 					<Nav.Link as={Link} to="/pantry">My Pantry</Nav.Link>
+					<Nav.Link as={Link} to="/recipe_view">My Cookbook</Nav.Link>
 					<Nav.Link as={Link} to={uid ? "/profile" : "/login"}>{uid ? "Profile" : "Login"}</Nav.Link>
 				</Nav>
 			</Navbar>
