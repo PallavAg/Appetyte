@@ -36,7 +36,7 @@ export default function SearchPage() {
     function updateResults() {
 
         const items = recipes.map((recipe) =>
-            <div style={{paddingLeft: '1rem', paddingRight: '1rem'}}>
+            <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
                 {RecipePreviewCard(recipe.name, recipe.coreIngredients)}
             </div>
         );
@@ -66,13 +66,16 @@ export default function SearchPage() {
         //       Will have to filter out elements at end of search.
 
         const querySnapshot = await getDocs(q);
-        const pantryQ = query(collection(db, "Users", uid, "Pantry"));
-        const pantryQuerySnapshot = await getDocs(pantryQ);
+        let pantryQuerySnapshot;
+        if (uid) {
+            const pantryQ = query(collection(db, "Users", uid, "Pantry"));
+            pantryQuerySnapshot = await getDocs(pantryQ);
+        }
 
         let pantryIngredients = [];
         let pantryIngredientNames = [];
 
-        if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY) {
+        if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY && uid) {
             // Searching by ingredients in their pantry
 
             pantryQuerySnapshot.forEach((doc) => {
@@ -115,7 +118,7 @@ export default function SearchPage() {
             });
 
         }
-        else if (segmentedCtrlState === SearchType.INGREDIENTS) {
+        else if (segmentedCtrlState === SearchType.INGREDIENTS && uid) {
             // TODO: Space separate and comma separate ingredients!
             // TODO: Make an acceptance criteria for this?
 
@@ -155,8 +158,9 @@ export default function SearchPage() {
             });
 
         }
-        else if (segmentedCtrlState === SearchType.NAME) {
+        else if (segmentedCtrlState === SearchType.NAME || !uid) {
             // Searching by name
+            // The only method allowed when the user is logged out
             querySnapshot.forEach((doc) => {
                 let name = doc.data()["name"];
                 let coreIngredients = doc.data()["coreIngredients"];
@@ -167,7 +171,7 @@ export default function SearchPage() {
 
         }
 
-        if (showRecipesOnlyInCookBook) {
+        if (showRecipesOnlyInCookBook && uid) {
             // Take out recipes that are not part of their cookbook
             const cookBookRecipes = []
 
@@ -188,8 +192,8 @@ export default function SearchPage() {
             );
         }
 
-        // Check if recipes cannot contain ingredients outside what I have on hand
-        if (!canContainNotInPantry) {
+        if (!canContainNotInPantry && uid) {
+            // Check if recipes can contain ingredients outside what I have in my pantry
 
             let filteredRecipes = [];
 
