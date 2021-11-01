@@ -23,15 +23,15 @@ export default function SearchPage() {
 
     const [segmentedControlHeight, hideComponentsWhenLoggedOut] = useState('block');
 
-    // // TODO: DELETE THIS
-    // const [testOutput, setTestOutput] = useState("");
+    // TODO: DELETE THIS
+    const [testOutput, setTestOutput] = useState("");
 
     const searchQuery = useRef("");
     const [canContainNotInPantry, setCanContainNotInPantry] = useState(false);
     const [showRecipesOnlyInCookBook, setShowRecipesOnlyInCookBook] = useState(false);
 
 
-    const {uid, getUnverifiedUID} = useAuth();
+    const {uid} = useAuth();
 
     function updateResults() {
 
@@ -73,7 +73,6 @@ export default function SearchPage() {
         let pantryIngredientNames = [];
 
         if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY) {
-
             // Searching by ingredients in their pantry
 
             pantryQuerySnapshot.forEach((doc) => {
@@ -120,7 +119,12 @@ export default function SearchPage() {
             // TODO: Space separate and comma separate ingredients!
             // TODO: Make an acceptance criteria for this?
 
-            let ingredients = [searchQuery.current.value.toLowerCase()];
+            // First remove strings separated by ", " then remove split by ","
+            // This allows for the user to put "ingredient, ingredient" or "ingredient,ingredient"
+            // This also allows preserves spaces in ingredients like "white pepper, gala apples"
+            const tempString = searchQuery.current.value.toLowerCase().split(", ").join(",");
+            let ingredients = tempString.split(',');
+            setTestOutput(ingredients)
             let alreadyAdded = false;
 
             // Searching by ingredients
@@ -132,7 +136,6 @@ export default function SearchPage() {
                     const coreMatch = (ingredient) => coreIngredients[i].name.toLowerCase().includes(ingredient);
                     if (ingredients.some(coreMatch)) {
                         tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
-
                         alreadyAdded = true;
                         break;
                     }
@@ -249,7 +252,7 @@ export default function SearchPage() {
         <div className='contentInsets'>
             <div className='pageTitle'>Search Recipes</div>
             <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
-                {/*<div>{JSON.stringify(testOutput)}</div>*/}
+                <div>{JSON.stringify(testOutput)}</div>
                 <Container>
                     <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
                         <ShowLoggedOutSearch/>
