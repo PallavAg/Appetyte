@@ -23,20 +23,20 @@ export default function SearchPage() {
 
     const [segmentedControlHeight, hideComponentsWhenLoggedOut] = useState('block');
 
-    // // TODO: DELETE THIS
-    // const [testOutput, setTestOutput] = useState("");
+    // TODO: DELETE THIS
+    const [testOutput, setTestOutput] = useState("");
 
     const searchQuery = useRef("");
     const [canContainNotInPantry, setCanContainNotInPantry] = useState(false);
     const [showRecipesOnlyInCookBook, setShowRecipesOnlyInCookBook] = useState(false);
 
 
-    const {uid, getUnverifiedUID} = useAuth();
+    const {uid} = useAuth();
 
     function updateResults() {
 
         const items = recipes.map((recipe) =>
-            <div style={{paddingLeft: '1rem', paddingRight: '1rem'}}>
+            <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
                 {RecipePreviewCard(recipe.name, recipe.coreIngredients)}
             </div>
         );
@@ -66,14 +66,16 @@ export default function SearchPage() {
         //       Will have to filter out elements at end of search.
 
         const querySnapshot = await getDocs(q);
-        const pantryQ = query(collection(db, "Users", uid, "Pantry"));
-        const pantryQuerySnapshot = await getDocs(pantryQ);
+        let pantryQuerySnapshot;
+        if (uid) {
+            const pantryQ = query(collection(db, "Users", uid, "Pantry"));
+            pantryQuerySnapshot = await getDocs(pantryQ);
+        }
 
         let pantryIngredients = [];
         let pantryIngredientNames = [];
 
-        if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY) {
-
+        if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY && uid) {
             // Searching by ingredients in their pantry
 
             pantryQuerySnapshot.forEach((doc) => {
@@ -116,11 +118,16 @@ export default function SearchPage() {
             });
 
         }
-        else if (segmentedCtrlState === SearchType.INGREDIENTS) {
+        else if (segmentedCtrlState === SearchType.INGREDIENTS && uid) {
             // TODO: Space separate and comma separate ingredients!
             // TODO: Make an acceptance criteria for this?
 
-            let ingredients = [searchQuery.current.value.toLowerCase()];
+            // First remove strings separated by ", " then remove split by ","
+            // This allows for the user to put "ingredient, ingredient" or "ingredient,ingredient"
+            // This also allows preserves spaces in ingredients like "white pepper, gala apples"
+            const tempString = searchQuery.current.value.toLowerCase().split(", ").join(",");
+            let ingredients = tempString.split(',');
+            setTestOutput(ingredients)
             let alreadyAdded = false;
 
             // Searching by ingredients
@@ -132,7 +139,6 @@ export default function SearchPage() {
                     const coreMatch = (ingredient) => coreIngredients[i].name.toLowerCase().includes(ingredient);
                     if (ingredients.some(coreMatch)) {
                         tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
-
                         alreadyAdded = true;
                         break;
                     }
@@ -152,19 +158,29 @@ export default function SearchPage() {
             });
 
         }
-        else if (segmentedCtrlState === SearchType.NAME) {
+        else if (segmentedCtrlState === SearchType.NAME || !uid) {
             // Searching by name
+            // The only method allowed when the user is logged out
+            const names = searchQuery.current.value.toLowerCase().split(" ").filter(name =>
+                // Filter out useless words
+                (name !== "" && name !== "in" && name !== "a" && name !== "the" && name !== "and")
+            )
+            setTestOutput(names);
+
             querySnapshot.forEach((doc) => {
                 let name = doc.data()["name"];
                 let coreIngredients = doc.data()["coreIngredients"];
-                if (name.toLowerCase().includes(searchQuery.current.value.toLowerCase())) {
-                    tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                for (let i = 0; i < names.length; i++) {
+                    if (name.toLowerCase().includes(names[i])) {
+                        tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                        break;
+                    }
                 }
             });
 
         }
 
-        if (showRecipesOnlyInCookBook) {
+        if (showRecipesOnlyInCookBook && uid) {
             // Take out recipes that are not part of their cookbook
             const cookBookRecipes = []
 
@@ -185,8 +201,8 @@ export default function SearchPage() {
             );
         }
 
-        // Check if recipes cannot contain ingredients outside what I have on hand
-        if (!canContainNotInPantry) {
+        if (!canContainNotInPantry && uid) {
+            // Check if recipes can contain ingredients outside what I have in my pantry
 
             let filteredRecipes = [];
 
@@ -249,7 +265,7 @@ export default function SearchPage() {
         <div className='contentInsets'>
             <div className='pageTitle'>Search Recipes</div>
             <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
-                {/*<div>{JSON.stringify(testOutput)}</div>*/}
+                <div>{JSON.stringify(testOutput)}</div>
                 <Container>
                     <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
                         <ShowLoggedOutSearch/>
