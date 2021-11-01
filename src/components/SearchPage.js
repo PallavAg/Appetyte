@@ -161,11 +161,20 @@ export default function SearchPage() {
         else if (segmentedCtrlState === SearchType.NAME || !uid) {
             // Searching by name
             // The only method allowed when the user is logged out
+            const names = searchQuery.current.value.toLowerCase().split(" ").filter(name =>
+                // Filter out useless words
+                (name !== "" && name !== "in" && name !== "a" && name !== "the" && name !== "and")
+            )
+            setTestOutput(names);
+
             querySnapshot.forEach((doc) => {
                 let name = doc.data()["name"];
                 let coreIngredients = doc.data()["coreIngredients"];
-                if (name.toLowerCase().includes(searchQuery.current.value.toLowerCase())) {
-                    tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                for (let i = 0; i < names.length; i++) {
+                    if (name.toLowerCase().includes(names[i])) {
+                        tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                        break;
+                    }
                 }
             });
 
