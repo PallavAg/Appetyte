@@ -3,7 +3,8 @@ import RecipePreviewCard from "./Subviews/RecipePreviewCard";
 import {Container, Button, Form, Row, Col} from "react-bootstrap";
 import { SegmentedControl } from 'segmented-control'
 import {db} from "../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore"
+import { collection, query, where, getDocs, FieldPath, documentId} from "firebase/firestore"
+
 import {useAuth} from "../contexts/AuthContext"
 
 const SearchType = {
@@ -20,13 +21,15 @@ export default function SearchPage() {
     const [recipes, setRecipes] = useState([]);
     const [tableLabel, setTableLabel] = useState("");
 
-    const [segmentedControlHeight, setSegmentedControlHeight] = useState(45);
-    const [segmentedBorderWidth, setSegmentedBorderWidth] = useState(4);
+    const [segmentedControlHeight, hideComponentsWhenLoggedOut] = useState('block');
 
-    // TODO: DELETE THIS
-    const [testOutput, setTestOutput] = useState("");
+    // // TODO: DELETE THIS
+    // const [testOutput, setTestOutput] = useState("");
 
     const searchQuery = useRef("");
+    const [canContainNotInPantry, setCanContainNotInPantry] = useState(false);
+    const [showRecipesOnlyInCookBook, setShowRecipesOnlyInCookBook] = useState(false);
+
 
     const {uid, getUnverifiedUID} = useAuth();
 
@@ -55,17 +58,23 @@ export default function SearchPage() {
         }
 
         const q = query(recipesRef, where("recipeType", "==", "Public"));
+
+        // Note: I wanted to have a separate query like:
+        //          q = query(recipesRef, where(documentId(), "in", cookBookRecipes))
+        //       for when only looking at recipes in cookbook/saved. However, Firebase
+        //       only supports in if the array is 10 or less elements :/
+        //       Will have to filter out elements at end of search.
+
         const querySnapshot = await getDocs(q);
+        const pantryQ = query(collection(db, "Users", uid, "Pantry"));
+        const pantryQuerySnapshot = await getDocs(pantryQ);
+
+        let pantryIngredients = [];
+        let pantryIngredientNames = [];
 
         if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY) {
 
             // Searching by ingredients in their pantry
-
-            const pantryQ = query(collection(db, "Users", uid, "Pantry"));
-            const pantryQuerySnapshot = await getDocs(pantryQ);
-
-            let pantryIngredients = [];
-            let pantryIngredientNames = [];
 
             pantryQuerySnapshot.forEach((doc) => {
                 let name = doc.data()["name"];
@@ -151,18 +160,70 @@ export default function SearchPage() {
                 if (name.toLowerCase().includes(searchQuery.current.value.toLowerCase())) {
                     tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
                 }
-
             });
 
         }
 
-        // Check if recipes cannot contain ingredients outside what I have on hand
+        if (showRecipesOnlyInCookBook) {
+            // Take out recipes that are not part of their cookbook
+            const cookBookRecipes = []
 
-        // Check if should only search for recipes in my cookbook
+            // TODO: Test when the user has no created or saved recipes, i.e. these collections don't exist
+            const qCookbook = query(collection(db, "Users", uid, "CreatedRecipes"));
+            const cookbookSnapshot = await getDocs(qCookbook);
+            cookbookSnapshot.forEach((doc) => {
+                cookBookRecipes.push(doc.id);
+            });
+            const qSaved = query(collection(db, "Users", uid, "SavedRecipes"))
+            const savedRecipesSnapshot = await getDocs(qSaved);
+            savedRecipesSnapshot.forEach((doc) => {
+                cookBookRecipes.push(doc.id)
+            });
+
+            tempRecipes = tempRecipes.filter(recipe =>
+                ((cookBookRecipes.includes(recipe.id)) === true)
+            );
+        }
+
+        // Check if recipes cannot contain ingredients outside what I have on hand
+        if (!canContainNotInPantry) {
+
+            let filteredRecipes = [];
+
+            tempRecipes.forEach(element => {
+                let keepRecipe = true;
+                for (let i = 0; i < element.coreIngredients.length; i++) {
+                    if (!pantryIngredients.includes(element.coreIngredients[i].name)) {
+                        // Core ingredient missing from the pantry
+                        keepRecipe = false;
+                        break;
+                    }
+                }
+
+                if (keepRecipe) {
+                    for (let i = 0; i < element.sideIngredients.length; i++) {
+                        if (!pantryIngredients.includes(element.sideIngredients[0].name)) {
+                            // Side ingredient missing from the pantry
+                            keepRecipe = false;
+                            break;
+                        }
+                    }
+
+                    if (keepRecipe) {
+                        // Recipe can be added to returned results
+                        filteredRecipes.push(element);
+                    }
+                }
+            });
+
+            tempRecipes = filteredRecipes;
+        }
 
         //setTestRecipeName(recipes[0])
         if (tempRecipes.length === 0) {
             setTableLabel("No Results");
+        } else {
+            setTableLabel("");
         }
         setRecipes(tempRecipes);
 
@@ -170,28 +231,13 @@ export default function SearchPage() {
 
     function ShowLoggedOutSearch() {
         if (uid !== null) {
-            setSegmentedControlHeight(45);
-            setSegmentedBorderWidth(4);
+            hideComponentsWhenLoggedOut('block');
             return "Search By";
         } else {
             // I'm doing it this weird way because I can't interact with a segmented control when
             //     it's generated conditional for some reason.
-            setSegmentedControlHeight(0);
-            setSegmentedBorderWidth(0);
+            hideComponentsWhenLoggedOut('none');
             return "Search by Name";
-        }
-    }
-
-    function ShowSearchOptions() {
-        if (uid !== null) {
-            return <Form className='leftContentInsets'>
-                <Form.Group className="mb-3" controlId="formBasicCheckbox" style={{color: 'white'}}>
-                    <Form.Check type="checkbox" label="Can contain ingredients not my in pantry" />
-                    <Form.Check type="checkbox" label="Show only recipes in my cookbook" />
-                </Form.Group>
-            </Form>
-        } else {
-            return <div></div>
         }
     }
 
@@ -203,7 +249,7 @@ export default function SearchPage() {
         <div className='contentInsets'>
             <div className='pageTitle'>Search Recipes</div>
             <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
-                <div>{JSON.stringify(testOutput)}</div>
+                {/*<div>{JSON.stringify(testOutput)}</div>*/}
                 <Container>
                     <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
                         <ShowLoggedOutSearch/>
@@ -220,7 +266,7 @@ export default function SearchPage() {
                                     { label: "Name", value: 2},
                                 ]}
                                 setValue={newValue => setSegmentedCtrlState(newValue)}
-                                style={{ width: 600, height: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: segmentedBorderWidth, borderRadius: '15px', fontSize: 15}} // purple400
+                                style={{ width: 600, display: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
                             />
                         </Col>
                         <Col>
@@ -240,13 +286,24 @@ export default function SearchPage() {
                                 />
                             </Col>
                             <Col md="auto">
-                                <Button style={{borderRadius: 5, color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}} onClick={e => searchForRecipe(e)}>Search</Button>
+                                <Button style={{borderRadius: 5, color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}} type='submit' onClick={e => searchForRecipe(e)}>Search</Button>
                             </Col>
                         </Row>
 
                     </Form.Group>
                 </Form>
-                <ShowSearchOptions/>
+                <Form className='leftContentInsets' style={{display: segmentedControlHeight}}>
+                    <Form.Group className="mb-3" style={{color: 'white'}}>
+                        <Form.Check type="checkbox" label="Can contain ingredients not my in pantry" onChange={e => {
+                            setCanContainNotInPantry(e.target.checked);
+                        }
+                        }/>
+                        <Form.Check type="checkbox" label="Show only recipes in my cookbook" onChange={e => {
+                            setShowRecipesOnlyInCookBook(e.target.checked);
+                        }
+                        }/>
+                    </Form.Group>
+                </Form>
             </div>
             <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', paddingBottom: '1rem'}}>
                 <div style={{textAlign: 'center', fontSize: 20}}>{tableLabel}</div>
