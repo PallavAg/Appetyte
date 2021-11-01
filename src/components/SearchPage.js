@@ -3,9 +3,10 @@ import RecipePreviewCard from "./Subviews/RecipePreviewCard";
 import {Container, Button, Form, Row, Col} from "react-bootstrap";
 import { SegmentedControl } from 'segmented-control'
 import {db} from "../firebase";
-import { collection, query, where, getDocs, FieldPath, documentId} from "firebase/firestore"
+import { collection, query, where, getDocs } from "firebase/firestore"
 
 import {useAuth} from "../contexts/AuthContext"
+import {Link, useLocation} from "react-router-dom";
 
 const SearchType = {
     INGREDIENTS_IN_MY_PANTRY: 0,
@@ -14,20 +15,26 @@ const SearchType = {
 
 }
 
-export default function SearchPage() {
+export default function SearchPage(searchData = "") {
 
-    const [segmentedCtrlState, setSegmentedCtrlState] = useState(0);
+    const [segmentedCtrlState, setSegmentedCtrlState] = useState(1);
 
     const [recipes, setRecipes] = useState([]);
     const [tableLabel, setTableLabel] = useState("");
+    const { state } = useLocation();
 
+    // Show the segmented control
     const [segmentedControlHeight, hideComponentsWhenLoggedOut] = useState('block');
+    // Show the 'Can contain ingredients not my in pantry as well' checkbox
     const [hideNotInPantry, setHideNotInPantry] = useState('block');
-    const [hideNotListedIngredients, setHideNotListedIngredients] = useState('none');
+    // Show the 'Contains only ingredients listed in search or fewer' checkbox
+    const [hideNotListedIngredients, setHideNotListedIngredients] = useState('block');
+    // Show the search bar
+    const [hideSearchBar, setHideSearchBar] = useState('block');
 
 
     // TODO: DELETE THIS
-    const [testOutput, setTestOutput] = useState("");
+    const [testOutput, setTestOutput] = useState(searchData);
 
     const searchQuery = useRef("");
     // Show recipes with ingredeints outside what's in the user's pantry
@@ -37,8 +44,8 @@ export default function SearchPage() {
     // Show only ingredients that are listed in the search or fewer
     const [containsOnlyIngredientsInSearch, setContainsOnlyIngredientsInSearch] = useState(false);
 
-
     const {uid} = useAuth();
+
 
     function updateResults() {
 
@@ -203,7 +210,6 @@ export default function SearchPage() {
                 // Filter out useless words
                 (name !== "" && name !== "in" && name !== "a" && name !== "the" && name !== "and")
             )
-            setTestOutput(names);
 
             querySnapshot.forEach((doc) => {
                 let name = doc.data()["name"];
@@ -296,20 +302,29 @@ export default function SearchPage() {
     }
 
     useEffect(() => {
-        //searchForRecipe()
-    });
+        if (state !== undefined) {
+            searchQuery.current.value = state;
+
+        } else {
+            searchQuery.current.value = "";
+        }
+
+    }, []);
 
     function changeSegmentedControl(newValue) {
-        if (newValue == SearchType.INGREDIENTS_IN_MY_PANTRY) {
+        if (newValue === SearchType.INGREDIENTS_IN_MY_PANTRY) {
             setHideNotInPantry('block');
             setHideNotListedIngredients('none');
+            setHideSearchBar('none');
         }
-        else if (newValue == SearchType.INGREDIENTS) {
+        else if (newValue === SearchType.INGREDIENTS) {
             setHideNotInPantry('block');
             setHideNotListedIngredients('block');
-        } else if (newValue == SearchType.NAME) {
+            setHideSearchBar('block');
+        } else if (newValue === SearchType.NAME) {
             setHideNotInPantry('block');
             setHideNotListedIngredients('none');
+            setHideSearchBar('block');
         }
         setSegmentedCtrlState(newValue)
     }
@@ -317,6 +332,7 @@ export default function SearchPage() {
     return (
         <div className='contentInsets'>
             <div className='pageTitle'>Search Recipes</div>
+
             <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
                 {/*<div>{JSON.stringify(testOutput)}</div>*/}
                 <Container>
@@ -330,10 +346,11 @@ export default function SearchPage() {
                             <SegmentedControl // Using container in order to center the segmented control
                                 name="oneDisabled"
                                 options={[
-                                    { label: "Ingredients in My Pantry", value: 0, default: true},
-                                    { label: "Any Ingredients", value: 1 },
+                                    { label: "Ingredients in My Pantry", value: 0},
+                                    { label: "Any Ingredients", value: 1, default: true },
                                     { label: "Name", value: 2},
                                 ]}
+
                                 setValue={newValue => changeSegmentedControl(newValue)}
                                 style={{ width: 600, display: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
                             />
@@ -343,26 +360,22 @@ export default function SearchPage() {
                     </Row>
                 </Container>
                 <Form>
-                    <Form.Group className="mb-3" controlId="search">
-                        <Row>
-                            <Col>
-                                <Form.Control
-                                    type="name"
-                                    placeholder={"Search"}
-                                    ref={searchQuery}
-                                />
-                            </Col>
-                            <Col md="auto">
-                                <Button style={{borderRadius: 5, color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}} type='submit' onClick={e => searchForRecipe(e)}>Search</Button>
-                            </Col>
-                        </Row>
-
+                    <Form.Group className="mb-3" controlId="search" >
+                            <Form.Control
+                                type="name"
+                                placeholder={"Search"}
+                                style={{display: hideSearchBar, marginBottom: "0.5rem"}}
+                                ref={searchQuery}
+                            />
+                        <Button style={{borderRadius: 5, float: 'center', color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}}
+                                type='submit'   // This makes it search when you hit enter
+                                onClick={e => searchForRecipe(e)}>Search</Button>
                     </Form.Group>
                 </Form>
                 <Form className='leftContentInsets' style={{display: segmentedControlHeight}}>
                     <Form.Group className="mb-3" style={{color: 'white'}}>
                         <Form.Check type="checkbox"
-                                    label="Can contain ingredients not my in pantry"
+                                    label="Can contain ingredients not my in pantry as well"
                                     style={{display: hideNotInPantry}}
                                     onChange={e => {
                             setCanContainNotInPantry(e.target.checked);
