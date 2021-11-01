@@ -22,13 +22,20 @@ export default function SearchPage() {
     const [tableLabel, setTableLabel] = useState("");
 
     const [segmentedControlHeight, hideComponentsWhenLoggedOut] = useState('block');
+    const [hideNotInPantry, setHideNotInPantry] = useState('block');
+    const [hideNotListedIngredients, setHideNotListedIngredients] = useState('none');
+
 
     // TODO: DELETE THIS
     const [testOutput, setTestOutput] = useState("");
 
     const searchQuery = useRef("");
+    // Show recipes with ingredeints outside what's in the user's pantry
     const [canContainNotInPantry, setCanContainNotInPantry] = useState(false);
+    // Show only recipes that are in the users cookbook
     const [showRecipesOnlyInCookBook, setShowRecipesOnlyInCookBook] = useState(false);
+    // Show only ingredients that are listed in the search or fewer
+    const [containsOnlyIngredientsInSearch, setContainsOnlyIngredientsInSearch] = useState(false);
 
 
     const {uid} = useAuth();
@@ -99,7 +106,7 @@ export default function SearchPage() {
 
                     const coreMatch = (ingredient) => coreIngredients[i].name.toLowerCase().includes(ingredient);
                     if (pantryIngredientNames.some(coreMatch)) {
-                        tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                        tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id});
 
                         alreadyAdded = true;
                         break;
@@ -111,7 +118,7 @@ export default function SearchPage() {
                     for (let i = 0; i < sideIngredients.length; i++) {
                         const sideMatch = (ingredient) => sideIngredients[i].name.toLowerCase().includes(ingredient);
                         if (pantryIngredientNames.some(sideMatch)) {
-                            tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                            tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id});
                         }
                     }
                 }
@@ -119,8 +126,7 @@ export default function SearchPage() {
 
         }
         else if (segmentedCtrlState === SearchType.INGREDIENTS && uid) {
-            // TODO: Space separate and comma separate ingredients!
-            // TODO: Make an acceptance criteria for this?
+            // TODO: Space separate and comma separate ingredients
 
             // First remove strings separated by ", " then remove split by ","
             // This allows for the user to put "ingredient, ingredient" or "ingredient,ingredient"
@@ -138,7 +144,7 @@ export default function SearchPage() {
                 for (let i = 0; i < coreIngredients.length; i++) {
                     const coreMatch = (ingredient) => coreIngredients[i].name.toLowerCase().includes(ingredient);
                     if (ingredients.some(coreMatch)) {
-                        tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                        tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id});
                         alreadyAdded = true;
                         break;
                     }
@@ -149,13 +155,45 @@ export default function SearchPage() {
                     for (let i = 0; i < sideIngredients.length; i++) {
                         const sideMatch = (ingredient) => sideIngredients[i].name.toLowerCase().includes(ingredient);
                         if (ingredients.some(sideMatch)) {
-                            tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                            tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id});
                         }
                     }
                 }
 
-
             });
+
+            if (containsOnlyIngredientsInSearch) {
+                // Recipe can only contain the ingredients that were searched
+                let filteredRecipes = [];
+
+                tempRecipes.forEach(element => {
+                    let keepRecipe = true;
+                    for (let i = 0; i < element.coreIngredients.length; i++) {
+                        if (!ingredients.includes(element.coreIngredients[i].name)) {
+                            // Core ingredient missing from the search
+                            keepRecipe = false;
+                            break;
+                        }
+                    }
+
+                    if (keepRecipe) {
+                        for (let i = 0; i < element.sideIngredients.length; i++) {
+                            if (!ingredients.includes(element.sideIngredients[0].name)) {
+                                // Side ingredient missing from the search
+                                keepRecipe = false;
+                                break;
+                            }
+                        }
+
+                        if (keepRecipe) {
+                            // Recipe can be added to returned results
+                            filteredRecipes.push(element);
+                        }
+                    }
+                });
+
+                tempRecipes = filteredRecipes;
+            }
 
         }
         else if (segmentedCtrlState === SearchType.NAME || !uid) {
@@ -261,11 +299,26 @@ export default function SearchPage() {
         //searchForRecipe()
     });
 
+    function changeSegmentedControl(newValue) {
+        if (newValue == SearchType.INGREDIENTS_IN_MY_PANTRY) {
+            setHideNotInPantry('block');
+            setHideNotListedIngredients('none');
+        }
+        else if (newValue == SearchType.INGREDIENTS) {
+            setHideNotInPantry('block');
+            setHideNotListedIngredients('block');
+        } else if (newValue == SearchType.NAME) {
+            setHideNotInPantry('block');
+            setHideNotListedIngredients('none');
+        }
+        setSegmentedCtrlState(newValue)
+    }
+
     return (
         <div className='contentInsets'>
             <div className='pageTitle'>Search Recipes</div>
             <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
-                <div>{JSON.stringify(testOutput)}</div>
+                {/*<div>{JSON.stringify(testOutput)}</div>*/}
                 <Container>
                     <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
                         <ShowLoggedOutSearch/>
@@ -277,11 +330,11 @@ export default function SearchPage() {
                             <SegmentedControl // Using container in order to center the segmented control
                                 name="oneDisabled"
                                 options={[
-                                    { label: "Ingredients in My Pantry", value: 0, default: true },
+                                    { label: "Ingredients in My Pantry", value: 0, default: true},
                                     { label: "Any Ingredients", value: 1 },
                                     { label: "Name", value: 2},
                                 ]}
-                                setValue={newValue => setSegmentedCtrlState(newValue)}
+                                setValue={newValue => changeSegmentedControl(newValue)}
                                 style={{ width: 600, display: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
                             />
                         </Col>
@@ -297,8 +350,6 @@ export default function SearchPage() {
                                     type="name"
                                     placeholder={"Search"}
                                     ref={searchQuery}
-                                    //id={id}
-                                    //onChange={e => setField('name', e.target.value, id, 3)}
                                 />
                             </Col>
                             <Col md="auto">
@@ -310,8 +361,18 @@ export default function SearchPage() {
                 </Form>
                 <Form className='leftContentInsets' style={{display: segmentedControlHeight}}>
                     <Form.Group className="mb-3" style={{color: 'white'}}>
-                        <Form.Check type="checkbox" label="Can contain ingredients not my in pantry" onChange={e => {
+                        <Form.Check type="checkbox"
+                                    label="Can contain ingredients not my in pantry"
+                                    style={{display: hideNotInPantry}}
+                                    onChange={e => {
                             setCanContainNotInPantry(e.target.checked);
+                        }
+                        }/>
+                        <Form.Check type="checkbox"
+                                    label="Contains only ingredients listed in search or fewer"
+                                    style={{display: hideNotListedIngredients}}
+                                    onChange={e => {
+                            setContainsOnlyIngredientsInSearch(e.target.checked)
                         }
                         }/>
                         <Form.Check type="checkbox" label="Show only recipes in my cookbook" onChange={e => {
