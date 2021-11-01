@@ -21,9 +21,14 @@ export default function SearchPage() {
     const [recipes, setRecipes] = useState([]);
     const [tableLabel, setTableLabel] = useState("");
 
+    // Show the segmented control
     const [segmentedControlHeight, hideComponentsWhenLoggedOut] = useState('block');
+    // Show the 'Can contain ingredients not my in pantry as well' checkbox
     const [hideNotInPantry, setHideNotInPantry] = useState('block');
+    // Show the 'Contains only ingredients listed in search or fewer' checkbox
     const [hideNotListedIngredients, setHideNotListedIngredients] = useState('none');
+    // Show the search bar
+    const [hideSearchBar, setHideSearchBar] = useState('none');
 
 
     // TODO: DELETE THIS
@@ -296,20 +301,22 @@ export default function SearchPage() {
     }
 
     useEffect(() => {
-        //searchForRecipe()
     });
 
     function changeSegmentedControl(newValue) {
         if (newValue == SearchType.INGREDIENTS_IN_MY_PANTRY) {
             setHideNotInPantry('block');
             setHideNotListedIngredients('none');
+            setHideSearchBar('none');
         }
         else if (newValue == SearchType.INGREDIENTS) {
             setHideNotInPantry('block');
             setHideNotListedIngredients('block');
+            setHideSearchBar('block');
         } else if (newValue == SearchType.NAME) {
             setHideNotInPantry('block');
             setHideNotListedIngredients('none');
+            setHideSearchBar('block');
         }
         setSegmentedCtrlState(newValue)
     }
@@ -343,26 +350,20 @@ export default function SearchPage() {
                     </Row>
                 </Container>
                 <Form>
-                    <Form.Group className="mb-3" controlId="search">
-                        <Row>
-                            <Col>
-                                <Form.Control
-                                    type="name"
-                                    placeholder={"Search"}
-                                    ref={searchQuery}
-                                />
-                            </Col>
-                            <Col md="auto">
-                                <Button style={{borderRadius: 5, color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}} type='submit' onClick={e => searchForRecipe(e)}>Search</Button>
-                            </Col>
-                        </Row>
-
+                    <Form.Group className="mb-3" controlId="search" >
+                            <Form.Control
+                                type="name"
+                                placeholder={"Search"}
+                                style={{display: hideSearchBar, marginBottom: "0.5rem"}}
+                                ref={searchQuery}
+                            />
+                        <Button style={{borderRadius: 5, float: 'center', color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}} type='submit' onClick={e => searchForRecipe(e)}>Search</Button>
                     </Form.Group>
                 </Form>
                 <Form className='leftContentInsets' style={{display: segmentedControlHeight}}>
                     <Form.Group className="mb-3" style={{color: 'white'}}>
                         <Form.Check type="checkbox"
-                                    label="Can contain ingredients not my in pantry"
+                                    label="Can contain ingredients not my in pantry as well"
                                     style={{display: hideNotInPantry}}
                                     onChange={e => {
                             setCanContainNotInPantry(e.target.checked);
