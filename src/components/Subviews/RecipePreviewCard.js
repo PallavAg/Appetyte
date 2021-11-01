@@ -4,7 +4,7 @@ export default function RecipePreviewCard(recipeName, coreIngredients) {
 
     function generateCoreIngredientsList() {
         const coreItems = coreIngredients.map((ingredient) =>
-            <li>{ingredient.name}</li>
+            <li>{ingredient.quantity} {ingredient.name}</li>
         );
         if (coreItems.length > 5) {
             // Only show first 5 ingredients

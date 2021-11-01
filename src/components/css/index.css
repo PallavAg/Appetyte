@@ -19,7 +19,7 @@ code {
 }
 
 .smallCard {
-  background-color: #ebebeb;
+  background-color: white;
   padding: 0.1rem;
   border-radius: 15px;
 }
@@ -84,6 +84,11 @@ code {
 
 .leftContentInsets {
   padding-left: 1rem;
+}
+
+.leftAndRightContentInsets {
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 
 .rightJustified {
