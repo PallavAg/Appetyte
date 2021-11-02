@@ -7,7 +7,7 @@ import {useAuth} from "../contexts/AuthContext";
 import { doc, getDoc, collection, query, getDocs } from "firebase/firestore";
 import {getFirestore} from "firebase/firestore";
 import {initializeApp} from "firebase/app";
- 
+//import {list} from "firebase/firebase-storage";
 
 
 export default function MyPantryView() {
@@ -16,10 +16,16 @@ export default function MyPantryView() {
     const [futureIngredient, setFutureIngredient] = useState({name: "", expiration: ""});
     const [ingredientNames, setIngredientNames] = useState([]);
     const [ingredientExpirations, setIngredientExpirations] = useState([]);
+    const [checked, setChecked] = useState([]);
+    const [selectedIngredients, setSelectedIngredients] = useState([]);
 
     useEffect(()=>{
         getIngredients();
     }, []);
+
+    function handleChange() {
+        console.log("clicked search");
+    }
 
     function setField(field, value) {
         let copyIngredient = futureIngredient;
@@ -74,14 +80,19 @@ export default function MyPantryView() {
         let newIngredients = [];
         let newExpirations = [];
         ingredients.forEach( (ingredient, index) => {
-            newIngredients.push(
-                {
-                    id: index,
-                    name: ingredient.id,
-                    expiration: ingredient.data().expiration,
-                    delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, ingredient.id)}/>
-                }
-            );
+                newIngredients.push(
+                    {
+                        id: index,
+                        name: ingredient.id,
+                        expiration: ingredient.data().expiration,
+                        delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, ingredient.id)}/>,
+                        select: <input
+                            type="checkbox"
+                            value={checked}
+                            //onClick={handleChange(this.node.selectionContext.selected)}
+                        />
+                    }
+                );
             }
         );
         setIngredientNames(newIngredients);
@@ -118,10 +129,30 @@ export default function MyPantryView() {
         }
     ];
 
+    function handleClick() {
+        console.log(selectedIngredients.toString());
+    }
+
     const selectRow = {
-        mode: 'radio', // single row selection
+        mode: 'checkbox', // single row selection
         clickToSelect: true,
-        selectColumnPosition: 'right'
+        onSelect: (row, isSelect, rowIndex, e) => {
+            if (isSelect) {
+                // not in selected Ingredients
+                if (selectedIngredients.indexOf(row.name) == -1) {
+                    setSelectedIngredients([...selectedIngredients, row.name])
+                }
+            } else {
+                setSelectedIngredients(selectedIngredients.filter((x) => x !== row.name));
+            }
+        },
+        onSelectAll: (isSelect, rows, e) => {
+            if (isSelect) {
+                setSelectedIngredients(rows.map((row) => row.name))
+            } else {
+                setSelectedIngredients([]);
+            }
+        }
     };
 
     return (
@@ -163,8 +194,14 @@ export default function MyPantryView() {
                         bootstrap4
                         keyField="id"
                         data={ingredientNames}
+                        selectRow={selectRow}
                         columns={columns}
                     />
+                </div>
+                <div>
+                    <button onClick={handleClick}>
+                        Search
+                    </button>
                 </div>
                 {/*<button onClick={setIngredientNames}>Remove this button after add ingredient is implemented</button>*/}
                 {/*Note: deleting one ingredient will delete them all since they are all currently created with the same ID*/}
@@ -172,4 +209,3 @@ export default function MyPantryView() {
         </div>
     );
 }
-
