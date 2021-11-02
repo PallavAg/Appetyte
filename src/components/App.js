@@ -23,7 +23,7 @@ function App() {
 					<Toaster/>
 					<NavigationBar/>
 					<Switch>
-						<Route exact path="/" component={CreateRecipeView}/>
+						<Route exact path="/" component={SearchPage}/>
 						<Route path="/create_recipe" component={CreateRecipeView}/>
 						<Route path="/pantry" component={MyPantryView}/>
 						<Route path="/profile" component={ProfileView}/>

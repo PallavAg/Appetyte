@@ -7,7 +7,8 @@ import {useAuth} from "../contexts/AuthContext";
 import { doc, getDoc, collection, query, getDocs } from "firebase/firestore";
 import {getFirestore} from "firebase/firestore";
 import {initializeApp} from "firebase/app";
- 
+import {Link} from "react-router-dom";
+//import {list} from "firebase/firebase-storage";
 
 
 export default function MyPantryView() {
@@ -16,6 +17,8 @@ export default function MyPantryView() {
     const [futureIngredient, setFutureIngredient] = useState({name: "", expiration: ""});
     const [ingredientNames, setIngredientNames] = useState([]);
     const [ingredientExpirations, setIngredientExpirations] = useState([]);
+    const [checked, setChecked] = useState([]);
+    const [selectedIngredients, setSelectedIngredients] = useState([]);
 
     useEffect(()=>{
         getIngredients();
@@ -66,22 +69,28 @@ export default function MyPantryView() {
         setError("");
 
         // DB code
-        let docData = {expiration: expiration};
-        db.collection("Users").doc(uid).collection("Pantry").doc(name).set(docData).then(getIngredients, e => setError(e.message));
+        let docData = {name: name, expiration: expiration};
+        db.collection("Users").doc(uid).collection("Pantry").add(docData).then(getIngredients, e => setError(e.message));
     }
 
     function updateIngredients(ingredients) {
         let newIngredients = [];
         let newExpirations = [];
         ingredients.forEach( (ingredient, index) => {
-            newIngredients.push(
-                {
-                    id: index,
-                    name: ingredient.id,
-                    expiration: ingredient.data().expiration,
-                    delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, ingredient.id)}/>
-                }
-            );
+                newIngredients.push(
+                    {
+                        id: index,
+                        name: ingredient.data().name,
+                        expiration: ingredient.data().expiration,
+                        delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, ingredient.id)}/>,
+                        select: <input
+                            type="checkbox"
+                            value={checked}
+                            //onClick={handleChange(this.node.selectionContext.selected)}
+                        />,
+                        firebaseID: ingredient.id
+                    }
+                );
             }
         );
         setIngredientNames(newIngredients);
@@ -119,9 +128,25 @@ export default function MyPantryView() {
     ];
 
     const selectRow = {
-        mode: 'radio', // single row selection
+        mode: 'checkbox', // single row selection
         clickToSelect: true,
-        selectColumnPosition: 'right'
+        onSelect: (row, isSelect, rowIndex, e) => {
+            if (isSelect) {
+                // not in selected Ingredients
+                if (selectedIngredients.indexOf(row.name) == -1) {
+                    setSelectedIngredients([...selectedIngredients, row.name])
+                }
+            } else {
+                setSelectedIngredients(selectedIngredients.filter((x) => x !== row.name));
+            }
+        },
+        onSelectAll: (isSelect, rows, e) => {
+            if (isSelect) {
+                setSelectedIngredients(rows.map((row) => row.name))
+            } else {
+                setSelectedIngredients([]);
+            }
+        }
     };
 
     return (
@@ -163,8 +188,14 @@ export default function MyPantryView() {
                         bootstrap4
                         keyField="id"
                         data={ingredientNames}
+                        selectRow={selectRow}
                         columns={columns}
                     />
+                </div>
+                <div>
+                    <Link to={{ pathname: `/search`, state: selectedIngredients.toString()}}>
+                        <Button>Search </Button>
+                    </Link >
                 </div>
                 {/*<button onClick={setIngredientNames}>Remove this button after add ingredient is implemented</button>*/}
                 {/*Note: deleting one ingredient will delete them all since they are all currently created with the same ID*/}
@@ -172,4 +203,3 @@ export default function MyPantryView() {
         </div>
     );
 }
-

@@ -4,7 +4,7 @@ import {useAuth} from "../contexts/AuthContext";
 import {useHistory} from "react-router-dom";
 import {toast} from "react-hot-toast";
 import {doc, setDoc} from "firebase/firestore";
-import {db} from "../firebase";
+import {db, testing} from "../firebase";
 
 export default function SignUp() {
 	const emailRef = React.createRef()
@@ -63,7 +63,7 @@ export default function SignUp() {
 				// Attempt Log In
 				// Log In (located in auth context)
 				await login(email, password).then((user) => {
-					if (user.user.emailVerified) {
+					if (user.user.emailVerified || testing) {
 						setLoggedIn(true)
 						toast.success("Logged In Successfully!")
 						// Have to put here since user isn't logged in until verified
