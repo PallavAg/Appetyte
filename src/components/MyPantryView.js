@@ -7,6 +7,7 @@ import {useAuth} from "../contexts/AuthContext";
 import { doc, getDoc, collection, query, getDocs } from "firebase/firestore";
 import {getFirestore} from "firebase/firestore";
 import {initializeApp} from "firebase/app";
+import {Link} from "react-router-dom";
 //import {list} from "firebase/firebase-storage";
 
 
@@ -22,10 +23,6 @@ export default function MyPantryView() {
     useEffect(()=>{
         getIngredients();
     }, []);
-
-    function handleChange() {
-        console.log("clicked search");
-    }
 
     function setField(field, value) {
         let copyIngredient = futureIngredient;
@@ -129,10 +126,6 @@ export default function MyPantryView() {
         }
     ];
 
-    function handleClick() {
-        console.log(selectedIngredients.toString());
-    }
-
     const selectRow = {
         mode: 'checkbox', // single row selection
         clickToSelect: true,
@@ -199,9 +192,9 @@ export default function MyPantryView() {
                     />
                 </div>
                 <div>
-                    <button onClick={handleClick}>
-                        Search
-                    </button>
+                    <Link to={{ pathname: `/search`, state: selectedIngredients.toString()}}>
+                        <Button>Search </Button>
+                    </Link >
                 </div>
                 {/*<button onClick={setIngredientNames}>Remove this button after add ingredient is implemented</button>*/}
                 {/*Note: deleting one ingredient will delete them all since they are all currently created with the same ID*/}
