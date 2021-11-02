@@ -80,14 +80,15 @@ export default function MyPantryView() {
                 newIngredients.push(
                     {
                         id: index,
-                        name: ingredient.id,
+                        name: ingredient.data().name,
                         expiration: ingredient.data().expiration,
                         delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, ingredient.id)}/>,
                         select: <input
                             type="checkbox"
                             value={checked}
                             //onClick={handleChange(this.node.selectionContext.selected)}
-                        />
+                        />,
+                        firebaseID: ingredient.id
                     }
                 );
             }
