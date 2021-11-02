@@ -12,6 +12,17 @@ const app = firebase.initializeApp({
 	measurementId: "G-E8RDH36LL3"
 })
 
-export const auth = app.auth()
-export const db = app.firestore()
+const testing = false;
+
+const db = app.firestore();
+if (testing) {
+	db.useEmulator("localhost", 8080);
+}
+
+const auth = app.auth();
+if (testing) {
+	auth.useEmulator("http://localhost:9099");
+}
+
+export {testing, auth, db}
 export default app
