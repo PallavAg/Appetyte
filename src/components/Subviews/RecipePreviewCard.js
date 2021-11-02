@@ -1,6 +1,15 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
+import {db} from "../../firebase";
 
-export default function RecipePreviewCard(recipeName, coreIngredients) {
+export default function RecipePreviewCard(props) {
+
+    const [recipeID] = useState(props.recipe.id)
+    const [recipeName] = useState(props.recipe.name)
+    const [coreIngredients] = useState(props.recipe.coreIngredients)
+
+    const [upvoted, setUpvoted] = useState(false)
+    const [downvoted, setDownvoted] = useState(false)
+    const [voteCount, setVoteCount] = useState(false)
 
     function generateCoreIngredientsList() {
         const coreItems = coreIngredients.map((ingredient) =>
@@ -11,6 +20,19 @@ export default function RecipePreviewCard(recipeName, coreIngredients) {
             coreItems.length = 5;
         }
         return coreItems;
+    }
+
+    // Todo: Work in Progress
+    useEffect(()=>{
+        getVotes()
+    }, []);
+
+    function getVotes() {
+        db.collection("Recipes").doc(recipeID).get().then((doc) => {
+            if (doc.exists) {
+                console.log(recipeName + ": " + doc.data().upvoteCount)
+            }
+        })
     }
 
     return (
