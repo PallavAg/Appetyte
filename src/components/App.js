@@ -12,6 +12,7 @@ import CreateRecipeView from './CreateRecipeView'
 import IngredientView from "./Subviews/IngredientView";
 import SearchPage from "./SearchPage";
 import RecipeView from "./Subviews/RecipeView";
+import CookbookView from "./CookbookView";
 
 // Make sure everything is within <AuthContextProvider>
 function App() {
@@ -31,6 +32,7 @@ function App() {
 						<Route path="/ingredients" component={IngredientView}/>
 						<Route path="/search" component={SearchPage}/>
 						<Route path="/recipe_view" component={RecipeView}/>
+						<Route path="/cookbook" component={CookbookView}/>
 					</Switch>
 				</AuthContextProvider>
 			</Router>
