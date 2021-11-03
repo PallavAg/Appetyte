@@ -43,7 +43,7 @@ export default function ProfileView() {
 
 	function submitFeedback() {
 		const feedback = prompt("Submit feedback or suggestions anonymously: ");
-		if (feedback.length !== 0) {
+		if (feedback && feedback.length !== 0) {
 			addDoc(collection(db, "Feedback"), { feedback: feedback }).then(() => {
 				toast.success("Feedback submitted!")
 			});
