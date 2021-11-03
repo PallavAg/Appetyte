@@ -6,6 +6,8 @@ import firebase, {db} from "../firebase";
 import {BsFillTrashFill} from "react-icons/bs";
 import {collection, addDoc} from "firebase/firestore";
 import {useAuth} from "../contexts/AuthContext";
+import RecipePreviewCard from "./Subviews/RecipePreviewCard";
+import Upload from "./Subviews/Upload";
 
 export default function CreateRecipeView() {
 
@@ -274,6 +276,15 @@ export default function CreateRecipeView() {
 
             <div className='pageSubtitle'>Tags</div>
             <div><Form><Form.Control size='lg' placeholder='Enter up to 5 comma seperated tags' onChange={e => setTags(e.target.value)}/></Form></div>
+
+            <div className='pageSubtitle'>Image</div>
+
+            <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
+                {React.createElement(Upload)}
+            </div>
+            <div ><Button onClick={() => addInstructionRow()}>
+                Upload
+            </Button></div>
 
             <div className='pageSubtitle'>Other Information</div>
             <div><Form><Form.Control as='textarea' placeholder='Notes' rows='4' onChange={e => setNotes(e.target.value)}/></Form></div>
