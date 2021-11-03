@@ -100,7 +100,7 @@ export default function CookbookView() {
     function updateResults() {
         return displayedRecipes.map((recipe) =>
             <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
-                {React.createElement(RecipePreviewCard, {key: recipe.id, recipe: recipe})}
+                {React.createElement(RecipePreviewCard, {key: recipe.id, recipe: recipe, interactiveElement: 'none'})}
             </div>
         );
 
