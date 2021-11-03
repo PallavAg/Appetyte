@@ -3,6 +3,7 @@ import {db} from "../../firebase";
 import {Button} from "react-bootstrap";
 import {useAuth} from "../../contexts/AuthContext";
 import {doc, updateDoc, arrayUnion, arrayRemove} from "firebase/firestore";
+import {toast} from "react-hot-toast";
 
 export default function RecipePreviewCard(props) {
 
@@ -34,6 +35,11 @@ export default function RecipePreviewCard(props) {
     });
 
     async function performUpvote() {
+        if (!uid) {
+            toast.error("You must be logged in to do this")
+            return
+        }
+
         setUpvoted(!upvoted)
         if (upvoted) {
             await updateDoc(recipeRef, { upvotedList: arrayRemove(uid) }); // Remove upvote
@@ -45,6 +51,11 @@ export default function RecipePreviewCard(props) {
     }
 
     async function performDownvote() {
+        if (!uid) {
+            toast.error("You must be logged in to do this")
+            return
+        }
+        
         setDownvoted(!downvoted)
         if (downvoted) {
             await updateDoc(recipeRef, { downvotedList: arrayRemove(uid) }); // Remove downvote
