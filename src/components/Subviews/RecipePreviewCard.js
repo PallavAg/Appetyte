@@ -4,8 +4,8 @@ import {db} from "../../firebase";
 export default function RecipePreviewCard(props) {
 
     const [recipeID] = useState(props.recipe.id)
-    const [recipeName] = useState(props.recipe.name)
-    const [coreIngredients] = useState(props.recipe.coreIngredients)
+    const [recipeName] = useState(props.recipe.data.name)
+    const [coreIngredients] = useState(props.recipe.data.coreIngredients)
 
     const [upvoted, setUpvoted] = useState(false)
     const [downvoted, setDownvoted] = useState(false)

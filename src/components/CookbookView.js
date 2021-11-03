@@ -15,67 +15,90 @@ const SearchType = {
 
 export default function CookbookView() {
 
-    const [segmentedCtrlState, setSegmentedCtrlState] = useState(1);
+    const [segmentedCtrlState, setSegmentedCtrlState] = useState(0);
 
-    const [recipes, setRecipes] = useState([]);
+    const [displayedRecipes, setDisplayedRecipes] = useState([]);
+    const [createdRecipes, setCreatedRecipes] = useState([]);
+    const [savedRecipes, setSavedRecipes] = useState([]);
     const [tableLabel, setTableLabel] = useState("");
-    const { state } = useLocation();
+    // const { state } = useLocation();
 
     // Show the segmented control
     const [segmentedControlHeight, hideComponentsWhenLoggedOut] = useState('block');
-    // Show the 'Can contain ingredients not my in pantry as well' checkbox
-    const [hideNotInPantry, setHideNotInPantry] = useState('block');
-    // Show the 'Contains only ingredients listed in search or fewer' checkbox
-    const [hideNotListedIngredients, setHideNotListedIngredients] = useState('block');
     // Show the search bar
     const [hideSearchBar, setHideSearchBar] = useState('block');
 
 
     // TODO: DELETE THIS
-    //const [testOutput, setTestOutput] = useState(searchData);
+    const [testOutput, setTestOutput] = useState("");
 
     const searchQuery = useRef("");
-    // Show recipes with ingredeints outside what's in the user's pantry
-    const [canContainNotInPantry, setCanContainNotInPantry] = useState(false);
-    // Show only recipes that are in the users cookbook
-    const [showRecipesOnlyInCookBook, setShowRecipesOnlyInCookBook] = useState(false);
-    // Show only ingredients that are listed in the search or fewer
-    const [containsOnlyIngredientsInSearch, setContainsOnlyIngredientsInSearch] = useState(false);
 
     const {uid} = useAuth();
-    console.log(uid);
 
     async function getRecipes() {
         console.log("get recipes");
-        var tempRecipes = [];
-        const cookBookRecipes = []
 
-        // TODO: Test when the user has no created or saved recipes, i.e. these collections don't exist
-        if (SearchType.CREATED) {
-            const qCookbook = query(collection(db, "Users", uid, "CreatedRecipes"));
-            const cookbookSnapshot = await getDocs(qCookbook);
-            cookbookSnapshot.forEach((doc) => {
-                cookBookRecipes.push(doc.id);
-            });
-        } else if (SearchType.SAVED) {
-            const qSaved = query(collection(db, "Users", uid, "SavedRecipes"))
-            const savedRecipesSnapshot = await getDocs(qSaved);
-            savedRecipesSnapshot.forEach((doc) => {
-                cookBookRecipes.push(doc.id)
-            });
+        // Load created recipe ids
+        const createdRecipes = []
+        const qCookbook = query(collection(db, "Users", uid, "CreatedRecipes"));
+        const cookbookSnapshot = await getDocs(qCookbook);
+        cookbookSnapshot.forEach((doc) => {
+            createdRecipes.push(doc.id);
+        });
+
+        // Load saved recipe ids
+        const savedRecipes = []
+        const qSaved = query(collection(db, "Users", uid, "SavedRecipes"))
+        const savedRecipesSnapshot = await getDocs(qSaved);
+        savedRecipesSnapshot.forEach((doc) => {
+            savedRecipes.push(doc.id)
+        });
+
+        // Perform lookup in recipe collection on these saved recipes
+        const qLookup = query(collection(db, "Recipes"))
+        let createdRecipesData = []
+        let savedRecipesData = []
+        // Note: see comment in search page for why I couldn't do where(documentId(), "in", cookBookRecipes)
+        const recipesSnapshot = await getDocs(qLookup);
+        recipesSnapshot.forEach((doc) => {
+            if (createdRecipes.includes(doc.id)) {
+                createdRecipesData.push({id: doc.id, data: doc.data()})
+            }
+            else if (savedRecipes.includes(doc.id)) {
+                savedRecipesData.push({id: doc.id, data: doc.data()})
+            }
+        })
+
+        // Set recipes for use throughout the page
+        setCreatedRecipes(createdRecipesData);
+        setSavedRecipes(savedRecipesData);
+
+        // Display results in case user hasn't changed the segmented control yet
+        if (segmentedCtrlState === SearchType.CREATED) {
+            setDisplayedRecipes(createdRecipesData);
+            setTestOutput(createdRecipesData)
+        } else {
+            setDisplayedRecipes(savedRecipesData);
+            setTestOutput(savedRecipesData)
         }
-        tempRecipes = cookBookRecipes
-        console.log(tempRecipes);
-        setRecipes(tempRecipes);
+
     }
 
+    function updateSegmentedCtrlState(newValue) {
+        setSegmentedCtrlState(newValue);
+        if (newValue === SearchType.CREATED) {
+            setDisplayedRecipes(createdRecipes);
+            setTestOutput(createdRecipes);
+        }
+        else if (newValue == SearchType.SAVED) {
+            setDisplayedRecipes(savedRecipes);
+            setTestOutput(savedRecipes);
+        }
+    }
 
     function updateResults() {
-        console.log("update results");
-        let promise = getRecipes().then();
-        console.log("after promise");
-        // 'recipe' should contain id, name, coreIngredients
-        return recipes.map((recipe) =>
+        return displayedRecipes.map((recipe) =>
             <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
                 {React.createElement(RecipePreviewCard, {key: recipe.id, recipe: recipe})}
             </div>
@@ -83,6 +106,29 @@ export default function CookbookView() {
 
     }
 
+    function searchForRecipe(e) {
+        e.preventDefault()
+
+        // Searching by name
+        const names = searchQuery.current.value.toLowerCase().split(" ").filter(name =>
+            // Filter out useless words
+            (name !== "" && name !== "in" && name !== "a" && name !== "the" && name !== "and")
+        )
+
+        let tempRecipes = [];
+
+        for (let i = 0; i < displayedRecipes.length; i++) {
+            let recipeName = displayedRecipes[i].data.name;
+            for (let i = 0; i < names.length; i++) {
+                if (recipeName.toLowerCase().includes(names[i])) {
+                    tempRecipes.push(displayedRecipes[i]);
+                    break;
+                }
+            }
+        }
+
+        setDisplayedRecipes(tempRecipes);
+    }
 
     function ShowLoggedOutSearch() {
         console.log(uid);
@@ -98,12 +144,14 @@ export default function CookbookView() {
     }
 
     useEffect(() => {
-        if (state !== undefined) {
-            searchQuery.current.value = state;
+        // if (state !== undefined) {
+        //     searchQuery.current.value = state;
+        //
+        // } else {
+        //     searchQuery.current.value = "";
+        // }
 
-        } else {
-            searchQuery.current.value = "";
-        }
+        getRecipes()
 
     }, []);
 
@@ -112,7 +160,7 @@ export default function CookbookView() {
             <div className='pageTitle'> Cookbook </div>
 
             <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
-                {/*<div>{JSON.stringify(testOutput)}</div>*/}
+                <div>{JSON.stringify(testOutput)}</div>
                 <Container>
                     <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
                         <ShowLoggedOutSearch/>
@@ -127,8 +175,7 @@ export default function CookbookView() {
                                     { label: "Created Recipes", value: 0, default: true},
                                     { label: "Saved Recipes", value: 1}
                                 ]}
-
-                                //setValue={newValue => changeSegmentedControl(newValue)}
+                                setValue={newValue => updateSegmentedCtrlState(newValue)}
                                 style={{ width: 600, display: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
                             />
                         </Col>
@@ -145,6 +192,9 @@ export default function CookbookView() {
                             ref={searchQuery}
                         />
                     </Form.Group>
+                    <Button style={{borderRadius: 5, float: 'center', color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}}
+                            type='submit'   // This makes it search when you hit enter
+                            onClick={e => searchForRecipe(e)}>Search</Button>
                 </Form>
                 <Form className='leftContentInsets' style={{display: segmentedControlHeight}}>
 
