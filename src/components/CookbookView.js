@@ -76,10 +76,10 @@ export default function CookbookView() {
 
         // Display results in case user hasn't changed the segmented control yet
         if (segmentedCtrlState === SearchType.CREATED) {
-            setDisplayedRecipes(createdRecipesData);
+            setDisplayedRecipes([...createdRecipesData]);
             setTestOutput(createdRecipesData)
         } else {
-            setDisplayedRecipes(savedRecipesData);
+            setDisplayedRecipes([...savedRecipesData]);
             setTestOutput(savedRecipesData)
         }
 
@@ -88,11 +88,11 @@ export default function CookbookView() {
     function updateSegmentedCtrlState(newValue) {
         setSegmentedCtrlState(newValue);
         if (newValue === SearchType.CREATED) {
-            setDisplayedRecipes(createdRecipes);
+            setDisplayedRecipes([...createdRecipes]);
             setTestOutput(createdRecipes);
         }
         else if (newValue == SearchType.SAVED) {
-            setDisplayedRecipes(savedRecipes);
+            setDisplayedRecipes([...savedRecipes]);
             setTestOutput(savedRecipes);
         }
     }
@@ -109,6 +109,21 @@ export default function CookbookView() {
     function searchForRecipe(e) {
         e.preventDefault()
 
+        // Restore recipes to all to remove previous filters
+        let allRecipes;
+        if (segmentedCtrlState === SearchType.CREATED) {
+            allRecipes = [...createdRecipes];
+        }
+        else if (segmentedCtrlState === SearchType.SAVED) {
+            allRecipes = [...savedRecipes];
+        }
+
+
+        if (searchQuery.current.value === "") {
+            setDisplayedRecipes(allRecipes);
+            return;
+        }
+
         // Searching by name
         const names = searchQuery.current.value.toLowerCase().split(" ").filter(name =>
             // Filter out useless words
@@ -117,17 +132,17 @@ export default function CookbookView() {
 
         let tempRecipes = [];
 
-        for (let i = 0; i < displayedRecipes.length; i++) {
-            let recipeName = displayedRecipes[i].data.name;
-            for (let i = 0; i < names.length; i++) {
-                if (recipeName.toLowerCase().includes(names[i])) {
-                    tempRecipes.push(displayedRecipes[i]);
+        for (let i = 0; i < allRecipes.length; i++) {
+            let recipeName = allRecipes[i].data.name;
+            for (let l = 0; l < names.length; l++) {
+                if (recipeName.toLowerCase().includes(names[l])) {
+                    tempRecipes.push(allRecipes[i]);
                     break;
                 }
             }
         }
 
-        setDisplayedRecipes(tempRecipes);
+        setDisplayedRecipes([...tempRecipes]);
     }
 
     function ShowLoggedOutSearch() {
