@@ -12,7 +12,7 @@ const app = firebase.initializeApp({
 	measurementId: "G-E8RDH36LL3"
 })
 
-const testing = false;
+const testing = (process.env.REACT_APP_TESTING === "true") || false;
 
 const db = app.firestore();
 if (testing) {
