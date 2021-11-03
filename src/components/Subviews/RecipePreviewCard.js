@@ -9,7 +9,7 @@ export default function RecipePreviewCard(props) {
 
     const {uid} = useAuth();
 
-    const [recipeID] = useState(props.recipe.id)
+    const [recipeID] = useState(props.id)
     const [recipeName] = useState(props.recipe.name)
     const [coreIngredients] = useState(props.recipe.coreIngredients)
 

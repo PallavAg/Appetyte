@@ -43,16 +43,28 @@ export default function SearchPage(searchData = "") {
     const [showRecipesOnlyInCookBook, setShowRecipesOnlyInCookBook] = useState(false);
     // Show only ingredients that are listed in the search or fewer
     const [containsOnlyIngredientsInSearch, setContainsOnlyIngredientsInSearch] = useState(false);
+    // Sort results
+    const [sortResults, setSortResults] = useState(false);
 
     const {uid} = useAuth();
 
 
     function updateResults() {
 
-        // 'recipe' should contain id, name, coreIngredients
-        return recipes.map((recipe) =>
+        let finalRecipesList = recipes; // Needed to preserve unsorted list
+
+        if (sortResults) {
+            // Calculate votes for each recipe
+            recipes.forEach((recipe) => {
+                let count = recipe.data.upvotedList?.length - recipe.data.downvotedList?.length
+                recipe["votes"] = isNaN(count) ? 0 : count
+            })
+            finalRecipesList = [...recipes].sort((a, b) => b.votes - a.votes)
+        }
+
+        return finalRecipesList.map((recipe) =>
             <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
-                {React.createElement(RecipePreviewCard, {key: recipe.id, recipe: recipe})}
+                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data})}
             </div>
         );
 
@@ -113,8 +125,9 @@ export default function SearchPage(searchData = "") {
 
                     const coreMatch = (ingredient) => coreIngredients[i].name.toLowerCase().includes(ingredient);
                     if (pantryIngredientNames.some(coreMatch)) {
-                        tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id});
-
+                        tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id, data: doc.data()}); // @
+                        // @Ben, future template:
+                        // tempRecipes.push({id: doc.id, data: doc.data()});
                         alreadyAdded = true;
                         break;
                     }
@@ -125,7 +138,7 @@ export default function SearchPage(searchData = "") {
                     for (let i = 0; i < sideIngredients.length; i++) {
                         const sideMatch = (ingredient) => sideIngredients[i].name.toLowerCase().includes(ingredient);
                         if (pantryIngredientNames.some(sideMatch)) {
-                            tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id});
+                            tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id, data: doc.data()}); // @
                         }
                     }
                 }
@@ -151,7 +164,7 @@ export default function SearchPage(searchData = "") {
                 for (let i = 0; i < coreIngredients.length; i++) {
                     const coreMatch = (ingredient) => coreIngredients[i].name.toLowerCase().includes(ingredient);
                     if (ingredients.some(coreMatch)) {
-                        tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id});
+                        tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id, data: doc.data()}); // @
                         alreadyAdded = true;
                         break;
                     }
@@ -162,7 +175,7 @@ export default function SearchPage(searchData = "") {
                     for (let i = 0; i < sideIngredients.length; i++) {
                         const sideMatch = (ingredient) => sideIngredients[i].name.toLowerCase().includes(ingredient);
                         if (ingredients.some(sideMatch)) {
-                            tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id});
+                            tempRecipes.push({name: name, coreIngredients: coreIngredients, sideIngredients: sideIngredients, id: doc.id, data: doc.data()}); // @
                         }
                     }
                 }
@@ -216,7 +229,7 @@ export default function SearchPage(searchData = "") {
                 let coreIngredients = doc.data()["coreIngredients"];
                 for (let i = 0; i < names.length; i++) {
                     if (name.toLowerCase().includes(names[i])) {
-                        tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id});
+                        tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id, data: doc.data()}); // @
                         break;
                     }
                 }
@@ -390,6 +403,10 @@ export default function SearchPage(searchData = "") {
                         }/>
                         <Form.Check type="checkbox" label="Show only recipes in my cookbook" onChange={e => {
                             setShowRecipesOnlyInCookBook(e.target.checked);
+                        }
+                        }/>
+                        <Form.Check type="checkbox" label="Sort recipes by votes" onChange={e => {
+                            setSortResults(e.target.checked);
                         }
                         }/>
                     </Form.Group>
