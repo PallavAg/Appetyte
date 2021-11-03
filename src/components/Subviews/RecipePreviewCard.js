@@ -7,11 +7,12 @@ import {toast} from "react-hot-toast";
 
 export default function RecipePreviewCard(props) {
 
+
     const {uid} = useAuth();
 
-    const [recipeID] = useState(props.id)
-    const [recipeName] = useState(props.recipe.name)
-    const [coreIngredients] = useState(props.recipe.coreIngredients)
+    const [recipeID] = useState(props.recipe.id)
+    const [recipeName] = useState(props.recipe.data.name)
+    const [coreIngredients] = useState(props.recipe.data.coreIngredients)
 
     const [saved, setSaved] = useState(false)
     const [upvoted, setUpvoted] = useState(false)
