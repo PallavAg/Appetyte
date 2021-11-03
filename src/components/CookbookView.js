@@ -94,6 +94,11 @@ export default function CookbookView() {
     }
 
     function updateResults() {
+        if (displayedRecipes.length === 0) {
+            setTableLabel("No Results");
+        } else {
+            setTableLabel("");
+        }
         return displayedRecipes.map((recipe) =>
             <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
                 {React.createElement(RecipePreviewCard, {key: recipe.id, recipe: recipe, interactiveElement: 'none'})}
@@ -203,7 +208,6 @@ export default function CookbookView() {
             </div>
             <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', borderRadius: '0px 0px 15px 15px'}}>
                 {tableLabel.length ? <div style={{textAlign: 'center', fontSize: 20, paddingBottom: '1rem'}}>{tableLabel}</div> : <></>}
-                {/*<div style={{paddingLeft: '1rem', paddingRight: '1rem'}}>{RecipePreviewCard("Turducken", [{name: "Turkey"}, {name: "Duck"}, {name: "Chicken"}, {name: "Chicken2"}, {name: "Chicken3"}, {name: "Chicken4"}])}</div>*/}
                 <div>{updateResults()}</div>
             </div>
 
