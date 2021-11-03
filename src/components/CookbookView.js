@@ -3,7 +3,7 @@ import RecipePreviewCard from "./Subviews/RecipePreviewCard";
 import {Container, Button, Form, Row, Col} from "react-bootstrap";
 import { SegmentedControl } from 'segmented-control'
 import {db} from "../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore"
+import {collection, query, where, getDocs, doc, getDoc} from "firebase/firestore"
 
 import {useAuth} from "../contexts/AuthContext"
 import {Link, useLocation} from "react-router-dom";
@@ -40,20 +40,16 @@ export default function CookbookView() {
         console.log("get recipes");
 
         // Load created recipe ids
-        const createdRecipes = []
-        const qCookbook = query(collection(db, "Users", uid, "CreatedRecipes"));
-        const cookbookSnapshot = await getDocs(qCookbook);
-        cookbookSnapshot.forEach((doc) => {
-            createdRecipes.push(doc.id);
-        });
-
+        let createdRecipes = []
         // Load saved recipe ids
-        const savedRecipes = []
-        const qSaved = query(collection(db, "Users", uid, "SavedRecipes"))
-        const savedRecipesSnapshot = await getDocs(qSaved);
-        savedRecipesSnapshot.forEach((doc) => {
-            savedRecipes.push(doc.id)
-        });
+        let savedRecipes = []
+
+        const qUser = query(doc(db, "Users", uid));
+        const userSnapshot = await getDoc(qUser);
+        if (userSnapshot.exists()) {
+            createdRecipes = userSnapshot.data().createdRecipes;
+            savedRecipes = userSnapshot.data().saved;
+        }
 
         // Perform lookup in recipe collection on these saved recipes
         const qLookup = query(collection(db, "Recipes"))

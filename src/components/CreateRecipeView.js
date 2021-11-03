@@ -4,7 +4,7 @@ import Switch from "react-switch";
 import BootstrapTable from "react-bootstrap-table-next";
 import firebase, {db} from "../firebase";
 import {BsFillTrashFill} from "react-icons/bs";
-import {doc, collection, addDoc, setDoc} from "firebase/firestore";
+import {doc, collection, addDoc, setDoc, updateDoc, arrayUnion} from "firebase/firestore";
 import {useAuth} from "../contexts/AuthContext";
 
 export default function CreateRecipeView() {
@@ -367,14 +367,14 @@ export default function CreateRecipeView() {
         }
 
         // Add recipe to database
-        let recipeRef = collection(db, "Recipes");//collection(db, "Users", uid, "CreatedRecipes");
+        let recipeRef = collection(db, "Recipes");
         const docRef = await addDoc(recipeRef, recipe)
 
         setError(docRef.id);
 
         // Add recipe id under list of user's created recipes
-        let userCreatedRecipesRef = doc(db, "Users", uid, "CreatedRecipes", docRef.id);
-        await setDoc(userCreatedRecipesRef, {name: recipe.name})
+        let userCreatedRecipesRef = doc(db, "Users", uid);
+        await updateDoc(userCreatedRecipesRef, { createdRecipes: arrayUnion(docRef.id) });
 
 
     }

@@ -3,7 +3,7 @@ import RecipePreviewCard from "./Subviews/RecipePreviewCard";
 import {Container, Button, Form, Row, Col} from "react-bootstrap";
 import { SegmentedControl } from 'segmented-control'
 import {db} from "../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore"
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore"
 
 import {useAuth} from "../contexts/AuthContext"
 import {Link, useLocation} from "react-router-dom";
@@ -15,7 +15,7 @@ const SearchType = {
 
 }
 
-export default function SearchPage(searchData = "") {
+export default function SearchPage() {
 
     const [segmentedCtrlState, setSegmentedCtrlState] = useState(1);
 
@@ -34,7 +34,7 @@ export default function SearchPage(searchData = "") {
 
 
     // TODO: DELETE THIS
-    const [testOutput, setTestOutput] = useState(searchData);
+    const [testOutput, setTestOutput] = useState("");
 
     const searchQuery = useRef("");
     // Show recipes with ingredeints outside what's in the user's pantry
@@ -239,23 +239,19 @@ export default function SearchPage(searchData = "") {
 
         if (showRecipesOnlyInCookBook && uid) {
             // Take out recipes that are not part of their cookbook
-            const cookBookRecipes = []
 
-            // TODO: Test when the user has no created or saved recipes, i.e. these collections don't exist
-            const qCookbook = query(collection(db, "Users", uid, "CreatedRecipes"));
-            const cookbookSnapshot = await getDocs(qCookbook);
-            cookbookSnapshot.forEach((doc) => {
-                cookBookRecipes.push(doc.id);
-            });
-            const qSaved = query(collection(db, "Users", uid, "SavedRecipes"))
-            const savedRecipesSnapshot = await getDocs(qSaved);
-            savedRecipesSnapshot.forEach((doc) => {
-                cookBookRecipes.push(doc.id)
-            });
+            // TODO: Test when the user has no created or saved recipes, i.e. these arrays don't exist
+            const qUser = query(doc(db, "Users", uid));
+            const userSnapshot = await getDoc(qUser);
+            if (userSnapshot.exists()) {
+                const cookBookRecipes = userSnapshot.data().createdRecipes.concat(userSnapshot.data().saved);
 
-            tempRecipes = tempRecipes.filter(recipe =>
-                ((cookBookRecipes.includes(recipe.id)) === true)
-            );
+                tempRecipes = tempRecipes.filter(recipe =>
+                    ((cookBookRecipes.includes(recipe.id)) === true)
+                );
+            }
+
+
         }
 
         if (!canContainNotInPantry && uid) {
@@ -376,7 +372,7 @@ export default function SearchPage(searchData = "") {
                     <Form.Group className="mb-3" controlId="search" >
                             <Form.Control
                                 type="name"
-                                placeholder={"Search"}
+                                placeholder={segmentedCtrlState === SearchType.INGREDIENTS ? "Enter Ingredients" : "Enter Recipe Name"}
                                 style={{display: hideSearchBar, marginBottom: "0.5rem"}}
                                 ref={searchQuery}
                             />
@@ -388,14 +384,14 @@ export default function SearchPage(searchData = "") {
                 <Form className='leftContentInsets' style={{display: segmentedControlHeight}}>
                     <Form.Group className="mb-3" style={{color: 'white'}}>
                         <Form.Check type="checkbox"
-                                    label="Can contain ingredients not my in pantry as well"
+                                    label="Recipe results can include ingredients I don't have"
                                     style={{display: hideNotInPantry}}
                                     onChange={e => {
                             setCanContainNotInPantry(e.target.checked);
                         }
                         }/>
                         <Form.Check type="checkbox"
-                                    label="Contains only ingredients listed in search or fewer"
+                                    label="Results contain only ingredients in bar search or fewer"
                                     style={{display: hideNotListedIngredients}}
                                     onChange={e => {
                             setContainsOnlyIngredientsInSearch(e.target.checked)
