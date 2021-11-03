@@ -135,7 +135,7 @@ export default function SignUp() {
 						</Card.Body>
 					</Card>
 					<div className="w-100 text-center mt-2">
-						<Button type="button" className="btn-light btn-link shadow-none" onClick={() => {
+						<Button type="button" variant="link shadow-none" onClick={() => {
 							setSigningIn(!signingIn); setError('')
 						}}>{signingIn ? "Already have an account? Login instead." : "Create an Account"}</Button>
 					</div>

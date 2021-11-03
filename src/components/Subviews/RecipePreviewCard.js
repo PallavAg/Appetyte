@@ -13,6 +13,7 @@ export default function RecipePreviewCard(props) {
     const [recipeName] = useState(props.recipe.name)
     const [coreIngredients] = useState(props.recipe.coreIngredients)
 
+    const [saved, setSaved] = useState(false)
     const [upvoted, setUpvoted] = useState(false)
     const [downvoted, setDownvoted] = useState(false)
     const [voteCount, setVoteCount] = useState(0)
@@ -32,11 +33,37 @@ export default function RecipePreviewCard(props) {
 
     useEffect(()=> {
         getVotes()
+        getSavedState()
     });
+
+    async function performSave() {
+        if (!uid) {
+            toast.error("You must be logged in to save a post")
+            return
+        }
+
+        const userRef = doc(db, "Users", uid);
+
+        setSaved(!saved)
+        if (saved) await updateDoc(userRef, {saved: arrayRemove(recipeID)}); // Save recipe
+        else await updateDoc(userRef, { saved: arrayUnion(recipeID) }); // Un-save recipe
+
+        getSavedState()
+
+    }
+
+    function getSavedState() {
+        if (!uid) return
+
+        db.collection("Users").doc(uid).get().then((doc) => {
+            if (doc.exists && doc.data().saved?.includes(recipeID)) setSaved(true)
+            else setSaved(false)
+        })
+    }
 
     async function performUpvote() {
         if (!uid) {
-            toast.error("You must be logged in to do this")
+            toast.error("You must be logged in to vote on posts")
             return
         }
 
@@ -52,7 +79,7 @@ export default function RecipePreviewCard(props) {
 
     async function performDownvote() {
         if (!uid) {
-            toast.error("You must be logged in to do this")
+            toast.error("You must be logged in to vote on posts")
             return
         }
         
@@ -84,7 +111,10 @@ export default function RecipePreviewCard(props) {
 
         <div className='smallCard'>
             <div className='leftContentInsets'>
-                <div className='pageSubtitle'>{recipeName}</div>
+                <div style={{display: 'flex'}}>
+                    <div className='pageSubtitle'>{recipeName}</div>
+                    <Button style={{boxShadow: 'none', margin: '0.5rem'}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
+                </div>
                 <div>
                     <ul>{generateCoreIngredientsList()}</ul>
                 </div>
@@ -93,9 +123,9 @@ export default function RecipePreviewCard(props) {
                 <hr/>
 
                 <div style={{paddingBottom: '1rem', display: 'flex'}}>
-                    <Button style={{boxShadow: 'none'}} variant={upvoted ? "primary btn-sm" : "outline-primary btn-sm"} onClick={performUpvote}>↑</Button>
+                    <Button style={{boxShadow: 'none'}} variant={upvoted ? "primary btn-sm" : "outline-primary btn-sm"} onClick={performUpvote}><b>↑</b></Button>
                     <b style={{padding: '0.5rem'}}>{`${voteCount}`}</b>
-                    <Button style={{boxShadow: 'none'}} variant={downvoted ? "danger btn-sm" : "outline-danger btn-sm"} onClick={performDownvote}>↓</Button>
+                    <Button style={{boxShadow: 'none'}} variant={downvoted ? "danger btn-sm" : "outline-danger btn-sm"} onClick={performDownvote}><b>↓</b></Button>
                 </div>
             </div>
         </div>
