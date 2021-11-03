@@ -23,14 +23,14 @@ export default function CookbookView() {
     const [tableLabel, setTableLabel] = useState("");
     // const { state } = useLocation();
 
-    // Show the segmented control
-    const [segmentedControlHeight, hideComponentsWhenLoggedOut] = useState('block');
+    const [error, setError] = useState("");
+
     // Show the search bar
     const [hideSearchBar, setHideSearchBar] = useState('block');
 
 
     // TODO: DELETE THIS
-    const [testOutput, setTestOutput] = useState("");
+    //const [testOutput, setTestOutput] = useState("");
 
     const searchQuery = useRef("");
 
@@ -77,10 +77,8 @@ export default function CookbookView() {
         // Display results in case user hasn't changed the segmented control yet
         if (segmentedCtrlState === SearchType.CREATED) {
             setDisplayedRecipes([...createdRecipesData]);
-            setTestOutput(createdRecipesData)
         } else {
             setDisplayedRecipes([...savedRecipesData]);
-            setTestOutput(savedRecipesData)
         }
 
     }
@@ -89,11 +87,9 @@ export default function CookbookView() {
         setSegmentedCtrlState(newValue);
         if (newValue === SearchType.CREATED) {
             setDisplayedRecipes([...createdRecipes]);
-            setTestOutput(createdRecipes);
         }
         else if (newValue == SearchType.SAVED) {
             setDisplayedRecipes([...savedRecipes]);
-            setTestOutput(savedRecipes);
         }
     }
 
@@ -145,19 +141,6 @@ export default function CookbookView() {
         setDisplayedRecipes([...tempRecipes]);
     }
 
-    function ShowLoggedOutSearch() {
-        console.log(uid);
-        if (uid !== null) {
-            hideComponentsWhenLoggedOut('block');
-            return "Search By Name";
-        } else {
-            // I'm doing it this weird way because I can't interact with a segmented control when
-            //     it's generated conditional for some reason.
-            hideComponentsWhenLoggedOut('none');
-            return "Search by Name";
-        }
-    }
-
     useEffect(() => {
         // if (state !== undefined) {
         //     searchQuery.current.value = state;
@@ -166,19 +149,22 @@ export default function CookbookView() {
         //     searchQuery.current.value = "";
         // }
 
-        getRecipes()
+        if (uid !== null) {
+            getRecipes()
+        } else {
+            setError("Error: You must be logged in to view your cookbook.");
+        }
 
     }, []);
 
     return (
         <div className='contentInsets'>
             <div className='pageTitle'> Cookbook </div>
-
+            <div style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</div>
             <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
-                <div>{JSON.stringify(testOutput)}</div>
+                {/*<div>{JSON.stringify(testOutput)}</div>*/}
                 <Container>
                     <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
-                        <ShowLoggedOutSearch/>
                     </div>
                     <Row>
                         <Col >
@@ -191,7 +177,7 @@ export default function CookbookView() {
                                     { label: "Saved Recipes", value: 1}
                                 ]}
                                 setValue={newValue => updateSegmentedCtrlState(newValue)}
-                                style={{ width: 600, display: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
+                                style={{ width: 600, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
                             />
                         </Col>
                         <Col>
@@ -211,7 +197,7 @@ export default function CookbookView() {
                             type='submit'   // This makes it search when you hit enter
                             onClick={e => searchForRecipe(e)}>Search</Button>
                 </Form>
-                <Form className='leftContentInsets' style={{display: segmentedControlHeight}}>
+                <Form className='leftContentInsets'>
 
                 </Form>
             </div>
