@@ -94,14 +94,9 @@ export default function CookbookView() {
     }
 
     function updateResults() {
-        if (displayedRecipes.length === 0) {
-            setTableLabel("No Results");
-        } else {
-            setTableLabel("");
-        }
         return displayedRecipes.map((recipe) =>
             <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
-                {React.createElement(RecipePreviewCard, {key: recipe.id, recipe: recipe, interactiveElement: 'none'})}
+                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data, interactiveElement: 'none'})}
             </div>
         );
 
@@ -162,6 +157,14 @@ export default function CookbookView() {
 
     }, []);
 
+    function ShowNoResults() {
+        if (displayedRecipes.length === 0) {
+            return <div>No Results</div>
+        } else {
+            return <div></div>
+        }
+    }
+
     return (
         <div className='contentInsets'>
             <div className='pageTitle'> Cookbook </div>
@@ -207,7 +210,9 @@ export default function CookbookView() {
                 </Form>
             </div>
             <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', borderRadius: '0px 0px 15px 15px'}}>
-                {tableLabel.length ? <div style={{textAlign: 'center', fontSize: 20, paddingBottom: '1rem'}}>{tableLabel}</div> : <></>}
+                {tableLabel.length ? <div style={{textAlign: 'center', fontSize: 20, paddingBottom: '1rem'}}>
+                    <ShowNoResults/>
+                </div> : <></>}
                 <div>{updateResults()}</div>
             </div>
 

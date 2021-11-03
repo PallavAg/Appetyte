@@ -64,7 +64,7 @@ export default function SearchPage(searchData = "") {
 
         return finalRecipesList.map((recipe) =>
             <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
-                {React.createElement(RecipePreviewCard, {key: recipe.id, recipe: recipe, interactiveElement: 'flex'})}
+                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data, interactiveElement: 'flex'})}
             </div>
         );
 
