@@ -61,7 +61,7 @@ export default function CookbookView() {
             if (createdRecipes.includes(doc.id)) {
                 createdRecipesData.push({id: doc.id, data: doc.data()})
             }
-            else if (savedRecipes.includes(doc.id)) {
+            if (savedRecipes.includes(doc.id)) {
                 savedRecipesData.push({id: doc.id, data: doc.data()})
             }
         })
