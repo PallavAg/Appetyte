@@ -89,7 +89,8 @@ export default function SignUp() {
 			firstName: "SampleFirstName",
 			lastName: "SampleLastName",
 			username: "SampleUserName",
-			saved: []
+			saved: [],
+			createdRecipes: []
 		});
 
 		logout()

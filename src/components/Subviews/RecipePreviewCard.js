@@ -4,8 +4,10 @@ import {Button} from "react-bootstrap";
 import {useAuth} from "../../contexts/AuthContext";
 import {doc, updateDoc, arrayUnion, arrayRemove} from "firebase/firestore";
 import {toast} from "react-hot-toast";
+import {Link} from "react-router-dom";
 
 export default function RecipePreviewCard(props) {
+
 
     const {uid} = useAuth();
 
@@ -17,6 +19,8 @@ export default function RecipePreviewCard(props) {
     const [upvoted, setUpvoted] = useState(false)
     const [downvoted, setDownvoted] = useState(false)
     const [voteCount, setVoteCount] = useState(0)
+
+    const [hideElementsOnCookbook, setHideElementsOnCookbook] = useState(props.interactiveElement)
 
     const recipeRef = doc(db, "Recipes", recipeID);
 
@@ -112,17 +116,17 @@ export default function RecipePreviewCard(props) {
         <div className='smallCard'>
             <div className='leftContentInsets'>
                 <div style={{display: 'flex'}}>
-                    <div className='pageSubtitle'>{recipeName}</div>
-                    <Button style={{boxShadow: 'none', margin: '0.5rem'}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
+                    <div className='pageSubtitle' onClick={() => {props.viewingState(true)}}><u style={{ textDecorationColor: 'blue'}}>{recipeName}</u></div>
+                    <Button style={{boxShadow: 'none', margin: '0.5rem', display: hideElementsOnCookbook}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
                 </div>
                 <div>
                     <ul>{generateCoreIngredientsList()}</ul>
                 </div>
 
                 {/*Begin Voting UI*/}
-                <hr/>
+                <hr style={{display: hideElementsOnCookbook}}/>
 
-                <div style={{paddingBottom: '1rem', display: 'flex'}}>
+                <div style={{paddingBottom: '1rem', display: hideElementsOnCookbook}}>
                     <Button style={{boxShadow: 'none'}} variant={upvoted ? "primary btn-sm" : "outline-primary btn-sm"} onClick={performUpvote}><b>↑</b></Button>
                     <b style={{padding: '0.5rem'}}>{`${voteCount}`}</b>
                     <Button style={{boxShadow: 'none'}} variant={downvoted ? "danger btn-sm" : "outline-danger btn-sm"} onClick={performDownvote}><b>↓</b></Button>
