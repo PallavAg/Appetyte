@@ -300,6 +300,12 @@ export default function CreateRecipeView() {
 
     async function createRecipe() {
 
+        // Check the user is logged in
+        if (!uid) {
+            setError("You must be logged in to create a recipe.");
+            return;
+        }
+
         // Check that it has a name
         if (recipeName.value === "") {
             setError("You must provide a name for your recipe.");
