@@ -104,16 +104,16 @@ export default function SearchPage() {
         let pantryIngredients = [];
         let pantryIngredientNames = [];
 
+        pantryQuerySnapshot.forEach((doc) => {
+            let name = doc.data()["name"];
+            const expiration = doc.data()["expiration"];
+            pantryIngredientNames.push(name.toLowerCase());
+            // Adding map array with expiration date in case that can be used later to filter search query
+            pantryIngredients.push({name: name.toLowerCase(), expiration: expiration});
+        });
+
         if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY && uid) {
             // Searching by ingredients in their pantry
-
-            pantryQuerySnapshot.forEach((doc) => {
-                let name = doc.data()["name"];
-                const expiration = doc.data()["expiration"];
-                pantryIngredientNames.push(name.toLowerCase());
-                // Adding map array with expiration date in case that can be used later to filter search query
-                pantryIngredients.push({name: name.toLowerCase(), expiration: expiration});
-            });
 
             let alreadyAdded = false;
 
@@ -156,7 +156,6 @@ export default function SearchPage() {
             // This also allows preserves spaces in ingredients like "white pepper, gala apples"
             const tempString = searchQuery.current.value.toLowerCase().split(", ").join(",");
             let ingredients = tempString.split(',');
-            setTestOutput(ingredients)
             let alreadyAdded = false;
 
             // Searching by ingredients
@@ -199,19 +198,21 @@ export default function SearchPage() {
                         }
                     }
 
+                    // Commenting out so side ingredients don't matter
+                    // if (keepRecipe) {
+                    //     for (let i = 0; i < element.sideIngredients.length; i++) {
+                    //         if (!ingredients.includes(element.sideIngredients[0].name)) {
+                    //             // Side ingredient missing from the search
+                    //             keepRecipe = false;
+                    //             break;
+                    //         }
+                    //     }
+                    //
+                    //
+                    // }
                     if (keepRecipe) {
-                        for (let i = 0; i < element.sideIngredients.length; i++) {
-                            if (!ingredients.includes(element.sideIngredients[0].name)) {
-                                // Side ingredient missing from the search
-                                keepRecipe = false;
-                                break;
-                            }
-                        }
-
-                        if (keepRecipe) {
-                            // Recipe can be added to returned results
-                            filteredRecipes.push(element);
-                        }
+                        // Recipe can be added to returned results
+                        filteredRecipes.push(element);
                     }
                 });
 
@@ -259,32 +260,32 @@ export default function SearchPage() {
 
         if (!canContainNotInPantry && uid) {
             // Check if recipes can contain ingredients outside what I have in my pantry
-
             let filteredRecipes = [];
 
             tempRecipes.forEach(element => {
                 let keepRecipe = true;
                 for (let i = 0; i < element.coreIngredients.length; i++) {
-                    if (!pantryIngredients.includes(element.coreIngredients[i].name)) {
+                    if (!pantryIngredientNames.includes(element.coreIngredients[i].name)) {
                         // Core ingredient missing from the pantry
                         keepRecipe = false;
                         break;
                     }
                 }
 
+                // Don't eliminate based on side ingredients
+                // if (keepRecipe) {
+                //     for (let i = 0; i < element.data.sideIngredients.length; i++) {
+                //         if (!pantryIngredientNames.includes(element.data.sideIngredients[i].name)) {
+                //             // Side ingredient missing from the pantry
+                //             setTestOutput(element.data.sideIngredients[i].name)
+                //             keepRecipe = false;
+                //             break;
+                //         }
+                //     }
+                // }
                 if (keepRecipe) {
-                    for (let i = 0; i < element.sideIngredients.length; i++) {
-                        if (!pantryIngredients.includes(element.sideIngredients[0].name)) {
-                            // Side ingredient missing from the pantry
-                            keepRecipe = false;
-                            break;
-                        }
-                    }
-
-                    if (keepRecipe) {
-                        // Recipe can be added to returned results
-                        filteredRecipes.push(element);
-                    }
+                    // Recipe can be added to returned results
+                    filteredRecipes.push(element);
                 }
             });
 
