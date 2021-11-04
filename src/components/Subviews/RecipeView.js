@@ -3,43 +3,57 @@ import {doc, getDoc} from "firebase/firestore";
 import firebase, {db} from "../../firebase";
 import Collapsible from "react-collapsible";
 import {useAuth} from "../../contexts/AuthContext";
+import {useLocation} from "react-router-dom";
 
 
 export default function RecipeView() {
 
     const {uid} = useAuth();
+    const { state } = useLocation();
 
     const [error, setError] = useState("");
 
+    const [recipeName, setRecipeName] = useState([]);
     const [coreIngredients, setCoreIngredients] = useState([]);
     const [sideIngredients, setSideIngredients] = useState([]);
     const [instructions, setInstructions] = useState([]);
     const[tags, setTags] = useState([]);
     const[notes, setNotes] = useState([]);
+    const[author, setAuthor] = useState("");
 
     async function getIngredients() {
         // TODO: Will need to modify slightly based on if viewing your created, saved, or just public recipe
-        const recipeCollection = "CreatedRecipes";
+        //const recipeCollection = "CreatedRecipes";
+        const recipeId = state;
+        console.log(recipeId);
         //const recipeCollection = collection;
-        const recipeId = "5U32XhjmF8TiHwQyVoNT";
+        //const recipeId = "5U32XhjmF8TiHwQyVoNT";
         //const recipeId = recId;
         let recipeSnapshot;
         //if (recipeCollection == "CreatedRecipes") {
           //  recipeSnapshot = await getDoc(doc(db, "Users", "8O4wmwxgsbXcr112yd48xe2OHVb2", recipeCollection, recipeId));
         //} else {
-            recipeSnapshot = await getDoc(doc(db, "Recipes", recipeId));
+        recipeSnapshot = await getDoc(doc(db, "Recipes", recipeId));
         //}
         if (recipeSnapshot.exists) {
             const core = recipeSnapshot.data()["coreIngredients"];
             const side = recipeSnapshot.data()["sideIngredients"];
-            const steps = recipeSnapshot.data()[""];
+            const steps = recipeSnapshot.data()["instructions"];
             const tag = recipeSnapshot.data()["tags"];
             const blurb = recipeSnapshot.data()["blurb"];
+            const name = recipeSnapshot.data()["name"];
+            const author = recipeSnapshot.data()["author"];
+            setRecipeName(name);
             setCoreIngredients(core);
             setSideIngredients(side);
-            // setInstructions(steps);
+            setInstructions(steps);
             setTags(tag);
             setNotes(blurb);
+            if (author === uid) {
+                setAuthor("this recipe was created by you");
+            }
+
+
         } else {
             // doc.data() will be undefined in this case
             console.log("No such document!");
@@ -67,6 +81,13 @@ export default function RecipeView() {
         return sideItems;
     }
 
+    function generateInstructions() {
+        const steps = instructions.map((step) =>
+            <li>{step}</li>
+        );
+        return steps;
+    }
+
     function generateTagsList() {
         const tagItems = tags.map((tag) =>
             <li>{tag}</li>
@@ -76,28 +97,27 @@ export default function RecipeView() {
 
     return (
         <div className='card'>
-            <div className='pageTitle'>Recipe Name</div>
+            <div className='pageTitle'>
+                {recipeName}
+            </div>
+            <div>
+                {author}
+            </div>
             <span style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</span>
 
             <span className='pageSubtitle'>Core Ingredients</span>
-            <span><Collapsible trigger="More">
                 <div>
                     <ul>{generateCoreIngredientsList()}</ul>
                 </div>
-            </Collapsible></span>
 
             <div className='pageSubtitle'>Side Ingredients</div>
-            <span><Collapsible trigger="More">
                 <div>
                     <ul>{generateSideIngredientsList()}</ul>
                 </div>
-            </Collapsible></span>
             <div className='pageSubtitle'>Instructions</div>
-            <span><Collapsible trigger="More">
                 <div>
-                    <ul>{generateSideIngredientsList()}</ul>
+                    <ul>{generateInstructions()}</ul>
                 </div>
-            </Collapsible></span>
             <div className='pageSubtitle'>Tags</div>
             <span><Collapsible trigger="More">
                 <div>

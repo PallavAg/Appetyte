@@ -4,6 +4,7 @@ import {Button} from "react-bootstrap";
 import {useAuth} from "../../contexts/AuthContext";
 import {doc, updateDoc, arrayUnion, arrayRemove} from "firebase/firestore";
 import {toast} from "react-hot-toast";
+import {Link} from "react-router-dom";
 
 export default function RecipePreviewCard(props) {
 
@@ -115,7 +116,9 @@ export default function RecipePreviewCard(props) {
         <div className='smallCard'>
             <div className='leftContentInsets'>
                 <div style={{display: 'flex'}}>
-                    <div className='pageSubtitle'>{recipeName}</div>
+                    <Link to={{ pathname: `/recipe_view`, state: recipeID}}>
+                        <div className='pageSubtitle'>{recipeName}</div>
+                    </Link>
                     <Button style={{boxShadow: 'none', margin: '0.5rem', display: hideElementsOnCookbook}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
                 </div>
                 <div>

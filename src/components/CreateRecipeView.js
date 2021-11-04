@@ -358,6 +358,7 @@ export default function CreateRecipeView() {
             name: recipeName.value,
             coreIngredients: coreIngredients,
             sideIngredients: sideIngredients,
+            instructions: instructions,
             author: uid,
             upvotedList: [],
             downvotedList: [],
