@@ -7,6 +7,7 @@ import { collection, query, where, getDocs, doc, getDoc } from "firebase/firesto
 
 import {useAuth} from "../contexts/AuthContext"
 import {Link, useLocation} from "react-router-dom";
+import RecipeView from "./Subviews/RecipeView";
 
 const SearchType = {
     INGREDIENTS_IN_MY_PANTRY: 0,
@@ -48,6 +49,8 @@ export default function SearchPage() {
 
     const {uid} = useAuth();
 
+    const [viewing, setViewing] = useState(false);
+    const [viewingID, setViewingID] = useState()
 
     function updateResults() {
 
@@ -63,8 +66,8 @@ export default function SearchPage() {
         }
 
         return finalRecipesList.map((recipe) =>
-            <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
-                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data, interactiveElement: 'flex'})}
+            <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}} onClick={() => {setViewingID(recipe.id)}}>
+                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data, interactiveElement: 'flex', viewingState: setViewing})}
             </div>
         );
 
@@ -340,79 +343,88 @@ export default function SearchPage() {
 
     return (
         <div className='contentInsets'>
-            <div className='pageTitle'>Search Recipes</div>
+            {!viewing ?
+                <div>
+                    <div className='pageTitle'>Search Recipes</div>
 
-            <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
-                {/*<div>{JSON.stringify(testOutput)}</div>*/}
-                <Container>
-                    <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
-                        <ShowLoggedOutSearch/>
+                    <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
+                        {/*<div>{JSON.stringify(testOutput)}</div>*/}
+                        <Container>
+                            <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
+                                <ShowLoggedOutSearch/>
+                            </div>
+                            <Row>
+                                <Col >
+                                </Col>
+                                <Col>
+                                    <SegmentedControl // Using container in order to center the segmented control
+                                        name="oneDisabled"
+                                        options={[
+                                            { label: "Ingredients in My Pantry", value: 0},
+                                            { label: "Any Ingredients", value: 1, default: true },
+                                            { label: "Name", value: 2},
+                                        ]}
+
+                                        setValue={newValue => changeSegmentedControl(newValue)}
+                                        style={{ width: 600, display: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '20px', fontSize: 15}} // purple400
+                                    />
+                                </Col>
+                                <Col>
+                                </Col>
+                            </Row>
+                        </Container>
+                        <Form>
+                            <Form.Group className="mb-3" controlId="search" >
+                                <Form.Control
+                                    type="name"
+                                    placeholder={segmentedCtrlState === SearchType.INGREDIENTS ? "Enter Ingredients" : "Enter Recipe Name"}
+                                    style={{display: hideSearchBar, marginBottom: "0.5rem"}}
+                                    ref={searchQuery}
+                                />
+                                <Button style={{borderRadius: 5, float: 'center', color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}}
+                                        type='submit'   // This makes it search when you hit enter
+                                        onClick={e => searchForRecipe(e)}>Search</Button>
+                            </Form.Group>
+                        </Form>
+                        <Form className='leftContentInsets' style={{display: segmentedControlHeight}}>
+                            <Form.Group className="mb-3" style={{color: 'white'}}>
+                                <Form.Check type="checkbox"
+                                            label="Recipe results can include ingredients I don't have"
+                                            style={{display: hideNotInPantry}}
+                                            onChange={e => {
+                                                setCanContainNotInPantry(e.target.checked);
+                                            }
+                                            }/>
+                                <Form.Check type="checkbox"
+                                            label="Results contain only ingredients in bar search or fewer"
+                                            style={{display: hideNotListedIngredients}}
+                                            onChange={e => {
+                                                setContainsOnlyIngredientsInSearch(e.target.checked)
+                                            }
+                                            }/>
+                                <Form.Check type="checkbox" label="Show only recipes in my cookbook" onChange={e => {
+                                    setShowRecipesOnlyInCookBook(e.target.checked);
+                                }
+                                }/>
+                                <Form.Check type="checkbox" label="Sort recipes by votes" onChange={e => {
+                                    setSortResults(e.target.checked);
+                                }
+                                }/>
+                            </Form.Group>
+                        </Form>
                     </div>
-                    <Row>
-                        <Col >
-                        </Col>
-                        <Col>
-                            <SegmentedControl // Using container in order to center the segmented control
-                                name="oneDisabled"
-                                options={[
-                                    { label: "Ingredients in My Pantry", value: 0},
-                                    { label: "Any Ingredients", value: 1, default: true },
-                                    { label: "Name", value: 2},
-                                ]}
+                    <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', borderRadius: '0px 0px 15px 15px'}}>
+                        {tableLabel.length ? <div style={{textAlign: 'center', fontSize: 20, paddingBottom: '1rem'}}>{tableLabel}</div> : <></>}
+                        <div>{updateResults()}</div>
+                    </div>
 
-                                setValue={newValue => changeSegmentedControl(newValue)}
-                                style={{ width: 600, display: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '20px', fontSize: 15}} // purple400
-                            />
-                        </Col>
-                        <Col>
-                        </Col>
-                    </Row>
-                </Container>
-                <Form>
-                    <Form.Group className="mb-3" controlId="search" >
-                            <Form.Control
-                                type="name"
-                                placeholder={segmentedCtrlState === SearchType.INGREDIENTS ? "Enter Ingredients" : "Enter Recipe Name"}
-                                style={{display: hideSearchBar, marginBottom: "0.5rem"}}
-                                ref={searchQuery}
-                            />
-                        <Button style={{borderRadius: 5, float: 'center', color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}}
-                                type='submit'   // This makes it search when you hit enter
-                                onClick={e => searchForRecipe(e)}>Search</Button>
-                    </Form.Group>
-                </Form>
-                <Form className='leftContentInsets' style={{display: segmentedControlHeight}}>
-                    <Form.Group className="mb-3" style={{color: 'white'}}>
-                        <Form.Check type="checkbox"
-                                    label="Recipe results can include ingredients I don't have"
-                                    style={{display: hideNotInPantry}}
-                                    onChange={e => {
-                            setCanContainNotInPantry(e.target.checked);
-                        }
-                        }/>
-                        <Form.Check type="checkbox"
-                                    label="Results contain only ingredients in bar search or fewer"
-                                    style={{display: hideNotListedIngredients}}
-                                    onChange={e => {
-                            setContainsOnlyIngredientsInSearch(e.target.checked)
-                        }
-                        }/>
-                        <Form.Check type="checkbox" label="Show only recipes in my cookbook" onChange={e => {
-                            setShowRecipesOnlyInCookBook(e.target.checked);
-                        }
-                        }/>
-                        <Form.Check type="checkbox" label="Sort recipes by votes" onChange={e => {
-                            setSortResults(e.target.checked);
-                        }
-                        }/>
-                    </Form.Group>
-                </Form>
-            </div>
-            <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', borderRadius: '0px 0px 15px 15px'}}>
-                {tableLabel.length ? <div style={{textAlign: 'center', fontSize: 20, paddingBottom: '1rem'}}>{tableLabel}</div> : <></>}
-                <div>{updateResults()}</div>
-            </div>
-
+                </div>
+                :
+                <div>
+                    <h2 onClick={() => {setViewing(!viewing)}}>←</h2>
+                    {React.createElement(RecipeView, {id: viewingID})}
+                </div>
+            }
         </div>
     );
 

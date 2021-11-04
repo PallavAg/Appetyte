@@ -116,9 +116,7 @@ export default function RecipePreviewCard(props) {
         <div className='smallCard'>
             <div className='leftContentInsets'>
                 <div style={{display: 'flex'}}>
-                    <Link to={{ pathname: `/recipe_view`, state: recipeID}}>
-                        <div className='pageSubtitle'>{recipeName}</div>
-                    </Link>
+                    <div className='pageSubtitle' onClick={() => {props.viewingState(true)}}><u style={{ textDecorationColor: 'blue'}}>{recipeName}</u></div>
                     <Button style={{boxShadow: 'none', margin: '0.5rem', display: hideElementsOnCookbook}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
                 </div>
                 <div>

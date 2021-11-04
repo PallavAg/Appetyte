@@ -7,6 +7,7 @@ import {collection, query, where, getDocs, doc, getDoc} from "firebase/firestore
 
 import {useAuth} from "../contexts/AuthContext"
 import {Link, useLocation} from "react-router-dom";
+import RecipeView from "./Subviews/RecipeView";
 
 const SearchType = {
     CREATED: 0,
@@ -28,6 +29,8 @@ export default function CookbookView() {
     // Show the search bar
     const [hideSearchBar, setHideSearchBar] = useState('block');
 
+    const [viewing, setViewing] = useState(false);
+    const [viewingID, setViewingID] = useState()
 
     // TODO: DELETE THIS
     //const [testOutput, setTestOutput] = useState("");
@@ -91,8 +94,8 @@ export default function CookbookView() {
 
     function updateResults() {
         return displayedRecipes.map((recipe) =>
-            <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
-                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data, interactiveElement: 'none'})}
+            <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}} onClick={() => {setViewingID(recipe.id)}}>
+                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data, interactiveElement: 'none', viewingState: setViewing})}
             </div>
         );
 
@@ -163,55 +166,63 @@ export default function CookbookView() {
 
     return (
         <div className='contentInsets'>
-            <div className='pageTitle'> Cookbook </div>
-            <div style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</div>
-            <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
-                {/*<div>{JSON.stringify(testOutput)}</div>*/}
-                <Container>
-                    <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
+            {!viewing ?
+                <div>
+                    <div className='pageTitle'> Cookbook </div>
+                    <div style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</div>
+                    <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
+                        {/*<div>{JSON.stringify(testOutput)}</div>*/}
+                        <Container>
+                            <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
+                            </div>
+                            <Row>
+                                <Col >
+                                </Col>
+                                <Col>
+                                    <SegmentedControl // Using container in order to center the segmented control
+                                        name="oneDisabled"
+                                        options={[
+                                            { label: "Created Recipes", value: 0, default: true},
+                                            { label: "Saved Recipes", value: 1}
+                                        ]}
+                                        setValue={newValue => updateSegmentedCtrlState(newValue)}
+                                        style={{ width: 600, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
+                                    />
+                                </Col>
+                                <Col>
+                                </Col>
+                            </Row>
+                        </Container>
+                        <Form>
+                            <Form.Group className="mb-3" controlId="search" >
+                                <Form.Control
+                                    type="name"
+                                    placeholder={"Search"}
+                                    style={{display: hideSearchBar, marginBottom: "0.5rem"}}
+                                    ref={searchQuery}
+                                />
+                            </Form.Group>
+                            <Button style={{borderRadius: 5, float: 'center', color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}}
+                                    type='submit'   // This makes it search when you hit enter
+                                    onClick={e => searchForRecipe(e)}>Search</Button>
+                        </Form>
+                        <Form className='leftContentInsets'>
+
+                        </Form>
                     </div>
-                    <Row>
-                        <Col >
-                        </Col>
-                        <Col>
-                            <SegmentedControl // Using container in order to center the segmented control
-                                name="oneDisabled"
-                                options={[
-                                    { label: "Created Recipes", value: 0, default: true},
-                                    { label: "Saved Recipes", value: 1}
-                                ]}
-                                setValue={newValue => updateSegmentedCtrlState(newValue)}
-                                style={{ width: 600, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
-                            />
-                        </Col>
-                        <Col>
-                        </Col>
-                    </Row>
-                </Container>
-                <Form>
-                    <Form.Group className="mb-3" controlId="search" >
-                        <Form.Control
-                            type="name"
-                            placeholder={"Search"}
-                            style={{display: hideSearchBar, marginBottom: "0.5rem"}}
-                            ref={searchQuery}
-                        />
-                    </Form.Group>
-                    <Button style={{borderRadius: 5, float: 'center', color: 'black', backgroundColor: 'lightgray', borderColor: 'lightgray'}}
-                            type='submit'   // This makes it search when you hit enter
-                            onClick={e => searchForRecipe(e)}>Search</Button>
-                </Form>
-                <Form className='leftContentInsets'>
-
-                </Form>
-            </div>
-            <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', borderRadius: '0px 0px 15px 15px'}}>
-                {tableLabel.length ? <div style={{textAlign: 'center', fontSize: 20, paddingBottom: '1rem'}}>
-                    <ShowNoResults/>
-                </div> : <></>}
-                <div>{updateResults()}</div>
-            </div>
-
+                    <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', borderRadius: '0px 0px 15px 15px'}}>
+                        {tableLabel.length ? <div style={{textAlign: 'center', fontSize: 20, paddingBottom: '1rem'}}>
+                            <ShowNoResults/>
+                        </div> : <></>}
+                        <div>{updateResults()}</div>
+                    </div>
+                </div>
+            :
+                <div>
+                    <h2 onClick={() => {setViewing(!viewing)}}>←</h2>
+                    {React.createElement(RecipeView, {id: viewingID})}
+                </div>
+            }
         </div>
     );
 

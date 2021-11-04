@@ -6,10 +6,10 @@ import {useAuth} from "../../contexts/AuthContext";
 import {useLocation} from "react-router-dom";
 
 
-export default function RecipeView() {
+export default function RecipeView(props) {
 
     const {uid} = useAuth();
-    const { state } = useLocation();
+    const { state } = useLocation(); // Use props.id instead
 
     const [error, setError] = useState("");
 
@@ -24,7 +24,7 @@ export default function RecipeView() {
     async function getIngredients() {
         // TODO: Will need to modify slightly based on if viewing your created, saved, or just public recipe
         //const recipeCollection = "CreatedRecipes";
-        const recipeId = state;
+        const recipeId = props.id;
         console.log(recipeId);
         //const recipeCollection = collection;
         //const recipeId = "5U32XhjmF8TiHwQyVoNT";
@@ -50,7 +50,7 @@ export default function RecipeView() {
             setTags(tag);
             setNotes(blurb);
             if (author === uid) {
-                setAuthor("this recipe was created by you");
+                setAuthor("This recipe was created by you");
             }
 
 
@@ -82,6 +82,7 @@ export default function RecipeView() {
     }
 
     function generateInstructions() {
+        if (!instructions) return (<></>)
         const steps = instructions.map((step) =>
             <li>{step}</li>
         );
@@ -96,7 +97,7 @@ export default function RecipeView() {
     }
 
     return (
-        <div className='card'>
+        <div className='card' style={{backgroundColor: '#ebebeb', borderRadius: '15px'}}>
             <div className='pageTitle'>
                 {recipeName}
             </div>
