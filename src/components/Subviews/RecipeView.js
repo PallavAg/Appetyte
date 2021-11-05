@@ -20,6 +20,7 @@ export default function RecipeView(props) {
     const[tags, setTags] = useState([]);
     const[notes, setNotes] = useState([]);
     const[author, setAuthor] = useState("");
+    const[image, setImage] = useState("");
 
     async function getIngredients() {
         // TODO: Will need to modify slightly based on if viewing your created, saved, or just public recipe
@@ -43,12 +44,15 @@ export default function RecipeView(props) {
             const blurb = recipeSnapshot.data()["blurb"];
             const name = recipeSnapshot.data()["name"];
             const author = recipeSnapshot.data()["author"];
+            const imageLink = recipeSnapshot.data()["image"];
             setRecipeName(name);
             setCoreIngredients(core);
             setSideIngredients(side);
             setInstructions(steps);
             setTags(tag);
             setNotes(blurb);
+            setImage(imageLink);
+            console.log(image);
             if (author === uid) {
                 setAuthor("This recipe was created by you");
             }
@@ -121,6 +125,7 @@ export default function RecipeView(props) {
                 <div>
                     <ul>{generateInstructions()}</ul>
                 </div>
+            <img src={image}/>
             <div className='pageSubtitle'>Tags</div>
             <span><Collapsible trigger="More">
                 <div>
