@@ -96,21 +96,23 @@ export default function SearchPage() {
 
         const querySnapshot = await getDocs(q);
         let pantryQuerySnapshot;
+        let pantryIngredients = [];
+        let pantryIngredientNames = [];
         if (uid) {
             const pantryQ = query(collection(db, "Users", uid, "Pantry"));
             pantryQuerySnapshot = await getDocs(pantryQ);
+            pantryQuerySnapshot.forEach((doc) => {
+                let name = doc.data()["name"];
+                const expiration = doc.data()["expiration"];
+                pantryIngredientNames.push(name.toLowerCase());
+                // Adding map array with expiration date in case that can be used later to filter search query
+                pantryIngredients.push({name: name.toLowerCase(), expiration: expiration});
+            });
         }
 
-        let pantryIngredients = [];
-        let pantryIngredientNames = [];
 
-        pantryQuerySnapshot.forEach((doc) => {
-            let name = doc.data()["name"];
-            const expiration = doc.data()["expiration"];
-            pantryIngredientNames.push(name.toLowerCase());
-            // Adding map array with expiration date in case that can be used later to filter search query
-            pantryIngredients.push({name: name.toLowerCase(), expiration: expiration});
-        });
+
+
 
         if (segmentedCtrlState === SearchType.INGREDIENTS_IN_MY_PANTRY && uid) {
             // Searching by ingredients in their pantry
