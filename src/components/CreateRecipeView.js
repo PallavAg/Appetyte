@@ -17,7 +17,7 @@ export default function CreateRecipeView() {
     const [sideIngredientNames, setSideIngredientNames] = useState({})
     const [sideIngredientQuantities, setSideIngredientQuantities] = useState({})
     const [instructions, setInstructions] = useState({})
-    const [image, setImage] = useState()
+    const [image, setImage] = useState("")
 
     const [instructionForms, setInstructionForms] = useState(
         [
