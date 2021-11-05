@@ -7,6 +7,7 @@ import {BsFillTrashFill} from "react-icons/bs";
 import {doc, collection, addDoc, setDoc, updateDoc, arrayUnion} from "firebase/firestore";
 import {useAuth} from "../contexts/AuthContext";
 import RecipePreviewCard from "./Subviews/RecipePreviewCard";
+import {toast} from "react-hot-toast";
 
 export default function CreateRecipeView() {
 
@@ -407,6 +408,7 @@ export default function CreateRecipeView() {
         let recipeRef = collection(db, "Recipes");
         const docRef = await addDoc(recipeRef, recipe)
 
+        toast.success("Recipe created!")
         setError(docRef.id);
 
         // Add recipe id under list of user's created recipes
