@@ -148,7 +148,6 @@ export default function SearchPage() {
                     }
                 }
             });
-
         }
         else if (segmentedCtrlState === SearchType.INGREDIENTS && uid) {
             // TODO: Space separate and comma separate ingredients
@@ -267,7 +266,7 @@ export default function SearchPage() {
             tempRecipes.forEach(element => {
                 let keepRecipe = true;
                 for (let i = 0; i < element.coreIngredients.length; i++) {
-                    if (!pantryIngredientNames.includes(element.coreIngredients[i].name)) {
+                    if (!pantryIngredientNames.includes(element.coreIngredients[i].name.toLowerCase())) {
                         // Core ingredient missing from the pantry
                         keepRecipe = false;
                         break;
