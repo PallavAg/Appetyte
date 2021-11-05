@@ -7,7 +7,6 @@ import {BsFillTrashFill} from "react-icons/bs";
 import {doc, collection, addDoc, setDoc, updateDoc, arrayUnion} from "firebase/firestore";
 import {useAuth} from "../contexts/AuthContext";
 import RecipePreviewCard from "./Subviews/RecipePreviewCard";
-import Upload from "./Subviews/Upload";
 
 export default function CreateRecipeView() {
 
@@ -18,6 +17,7 @@ export default function CreateRecipeView() {
     const [sideIngredientNames, setSideIngredientNames] = useState({})
     const [sideIngredientQuantities, setSideIngredientQuantities] = useState({})
     const [instructions, setInstructions] = useState({})
+    const [image, setImage] = useState()
 
     const [instructionForms, setInstructionForms] = useState(
         [
@@ -204,6 +204,8 @@ export default function CreateRecipeView() {
         setSideIngredientForms(sideIngredients => ([...sideIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
     }
 
+
+
     const toggleSwitch = (value) => {
         //To handle switch toggle
         setSwitchValue(value);
@@ -278,13 +280,29 @@ export default function CreateRecipeView() {
             <div><Form><Form.Control size='lg' placeholder='Enter up to 5 comma seperated tags' onChange={e => setTags(e.target.value)}/></Form></div>
 
             <div className='pageSubtitle'>Image</div>
+            <div><Form><Form.Control size='lg' placeholder='Enter image link'onChange={e => setImage(e.target.value)}/></Form></div>
 
-            <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}}>
-                {React.createElement(Upload)}
-            </div>
-            <div ><Button onClick={() => addInstructionRow()}>
-                Upload
-            </Button></div>
+           {/*<div>*/}
+           {/*     <input type="file" name="file" onChange={changeHandler} />*/}
+           {/*     {isSelected ? (*/}
+           {/*         <div>*/}
+
+           {/*              <p>Filename: {selectedFile.name}</p>*/}
+           {/*             <p>Filetype: {selectedFile.type}</p>*/}
+           {/*             <p>Size in bytes: {selectedFile.size}</p>*/}
+           {/*             <p>*/}
+           {/*                 lastModifiedDate:{' '}*/}
+           {/*                 {selectedFile.lastModifiedDate.toLocaleDateString()}*/}
+           {/*             </p>*/}
+           {/*         </div>*/}
+           {/*     ) : (*/}
+           {/*         <p>Select a file to show details</p>*/}
+           {/*     )}*/}
+           {/*     <div>*/}
+           {/*         <button onClick={handleSubmission}>Submit</button>*/}
+           {/*     </div>*/}
+           {/* </div>*/}
+
 
             <div className='pageSubtitle'>Other Information</div>
             <div><Form><Form.Control as='textarea' placeholder='Notes' rows='4' onChange={e => setNotes(e.target.value)}/></Form></div>
@@ -375,6 +393,7 @@ export default function CreateRecipeView() {
             downvotedList: [],
             recipeType: switchValue ? "Public" : "Private",
             tags: tags.split(','),
+            image: image,
             blurb: notes,
         }
 
