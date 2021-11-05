@@ -99,6 +99,7 @@ export default function RecipeView(props) {
         const tagItems = tags.map((tag) =>
             <li>{tag}</li>
         );
+        if (tags.length === 0 || tags[0].length === 0) return (<p>No Tags</p>)
         return tagItems;
     }
 
@@ -119,25 +120,19 @@ export default function RecipeView(props) {
 
             <div className='pageSubtitle'>Side Ingredients</div>
                 <div>
-                    <ul>{generateSideIngredientsList()}</ul>
+                    {sideIngredients.length !== 0 ? <ul>{generateSideIngredientsList()}</ul> : <p>No Side Ingredients Required</p>}
                 </div>
             <div className='pageSubtitle'>Instructions</div>
                 <div>
                     <ul>{generateInstructions()}</ul>
                 </div>
-            <img src={image}/>
+            <img style={{maxWidth: '30%'}} src={image}/>
             <div className='pageSubtitle'>Tags</div>
-            <span><Collapsible trigger="More">
                 <div>
-                    <ul>{generateTagsList()}</ul>
+                    {generateTagsList()}
                 </div>
-            </Collapsible></span>
             <div className='pageSubtitle'>Notes</div>
-            <span><Collapsible trigger="More">
-                <div>
-                    <ul>{notes}</ul>
-                </div>
-            </Collapsible></span>
+                <p>{notes.length === 0 ? "No Notes" : notes}</p>
         </div>
     );
 }
