@@ -8,47 +8,40 @@ import BootstrapTable from 'react-bootstrap-table-next';
 export default function MyPantryView() {
     const [results, setResults] = useState([{},{},{},{}]);
 
-    const columns = [
-        {
-            dataField: "num",
-            text: "#",
-            sort: true
-        },
-        {
-            dataField: "name",
-            text: "Name"
-        },
-        {
-            dataField: "status",
-            text: "Status"
-        },
-        {
-            dataField: "message",
-            text: "Message"
-        }
-    ]
+    useEffect(()=>{
+        runTests();
+    }, []);
 
-    function runTests(e) {
-        e.preventDefault();
-        // runTest(22, "Tags/Notes should appear in created space", tagsNotesTest);
-        // runTest(23, "User feedback is sent to firebase", feedbackTest);
-        // runTest(24, "Upvoting properly functions", upvoteTest);
-        // runTest(25, "Downvoting properly functions", downvoteTest);
-        runTest(22, tagsNotesTest);
-        runTest(23, feedbackTest);
-        runTest(24, upvoteTest);
-        runTest(25, downvoteTest);
+    function runTests() {
+        runTest(22, "Tags/Notes should appear in created space", tagsNotesTest);
+        runTest(23, "User feedback is sent to firebase", feedbackTest);
+        runTest(24, "Upvoting properly functions", upvoteTest);
+        runTest(25, "Downvoting properly functions", downvoteTest);
+        // runTest(22, tagsNotesTest);
+        // runTest(23, feedbackTest);
+        // runTest(24, upvoteTest);
+        // runTest(25, downvoteTest);
     }
 
-    function runTest(num, testFunction) {
+    function runTest(num, name, testFunction) {
         testFunction().then(result => {
             let resultsCopy = results;
             resultsCopy[num-22] = {
                 status: result.status,
                 message: result.message
             };
+            console.log(`Test #${num} ${name}:\nStatus: ${result.status}\nMessage: ${result.message}\n\n`);
             setResults(resultsCopy);
         });
+    }
+
+    function testRows() {
+        let rows = []
+        rows.push(testRow(22, "Tags/Notes should appear in created space"));
+        rows.push(testRow(23, "User feedback is sent to firebase"));
+        rows.push(testRow(24, "Upvoting properly functions"));
+        rows.push(testRow(25, "Downvoting properly functions"));
+        return testRow(22, "Tags/Notes should appear in created space");
     }
 
     function testRow(num, name) {
@@ -191,23 +184,29 @@ export default function MyPantryView() {
     } else {
         // Run tests
         return <div className='contentInsets'>
-            <Button onClick={(e) => runTests(e)}>Run Tests</Button>
-            <table className='table'>
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Result</th>
-                        <th scope="col">Message</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {testRow(22, "Tags/Notes should appear in created space")}
-                {testRow(23, "User feedback is sent to firebase")}
-                {testRow(24, "Upvoting properly functions")}
-                {testRow(25, "Downvoting properly functions")}
-                </tbody>
-            </table>
+            {/*<Button onClick={(e) => runTests(e)}>Run Tests</Button>*/}
+            {/*<table className='table'>*/}
+            {/*    <thead>*/}
+            {/*        <tr>*/}
+            {/*            <th scope="col">#</th>*/}
+            {/*            <th scope="col">Name</th>*/}
+            {/*            <th scope="col">Result</th>*/}
+            {/*            <th scope="col">Message</th>*/}
+            {/*        </tr>*/}
+            {/*    </thead>*/}
+            {/*    <tbody>*/}
+            {/*    <tr>*/}
+            {/*        <th scope="row">22</th>*/}
+            {/*        <td>"test"</td>*/}
+            {/*        <td><p>{results[0].status}</p></td>*/}
+            {/*        <td><p>{results[0].message}</p></td>*/}
+            {/*    </tr>*/}
+            {/*    /!*{testRows()}*!/*/}
+            {/*    </tbody>*/}
+            {/*</table>*/}
+            <p>
+                Test verifying is being run in the console!
+            </p>
         </div>
     }
 }
