@@ -192,7 +192,7 @@ export default function SearchPage() {
                 tempRecipes.forEach(element => {
                     let keepRecipe = true;
                     for (let i = 0; i < element.coreIngredients.length; i++) {
-                        if (!ingredients.includes(element.coreIngredients[i].name)) {
+                        if (!ingredients.includes(element.coreIngredients[i].name.toLowerCase())) {
                             // Core ingredient missing from the search
                             keepRecipe = false;
                             break;

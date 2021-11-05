@@ -67,7 +67,7 @@ export default function MyPantryView() {
         try {
             let tags = false;
             let notes = false;
-            if (recipe.data().blurb === "Notes") {
+            if (recipe.data().blurb === "Note") {
                 notes = true;
             }
             let r_tags = recipe.data().tags;
@@ -88,7 +88,7 @@ export default function MyPantryView() {
             } else if (tags && !notes) {
                 return {
                     status: "Failure",
-                    message: `Expected ${recipe.data().blurb} to be "Notes"`
+                    message: `Expected "${recipe.data().blurb}" to be "Note"`
                 }
             } else if (!tags && notes) {
                 return {
