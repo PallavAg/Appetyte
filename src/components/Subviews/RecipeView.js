@@ -16,7 +16,7 @@ export default function RecipeView(props) {
     const [recipeName, setRecipeName] = useState([]);
     const [coreIngredients, setCoreIngredients] = useState([]);
     const [sideIngredients, setSideIngredients] = useState([]);
-    const [instructions, setInstructions] = useState([]);
+    const [instructions, setInstructions] = useState({});
     const[tags, setTags] = useState([]);
     const[notes, setNotes] = useState([]);
     const[author, setAuthor] = useState("");
@@ -82,11 +82,13 @@ export default function RecipeView(props) {
     }
 
     function generateInstructions() {
+        console.log(instructions);
         if (!instructions) return (<></>)
-        const steps = instructions.map((step) =>
-            <li>{step}</li>
-        );
-        return steps;
+        let insts = [];
+        for (const [key, value] of Object.entries(instructions)) {
+            insts.push(<li>{value}</li>);
+        }
+        return insts;
     }
 
     function generateTagsList() {
