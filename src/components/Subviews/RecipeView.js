@@ -52,7 +52,6 @@ export default function RecipeView(props) {
             setTags(tag);
             setNotes(blurb);
             setImage(imageLink);
-            console.log(image);
             if (author === uid) {
                 setAuthor("This recipe was created by you");
             }
@@ -86,7 +85,6 @@ export default function RecipeView(props) {
     }
 
     function generateInstructions() {
-        console.log(instructions);
         if (!instructions) return (<></>)
         let insts = [];
         for (const [key, value] of Object.entries(instructions)) {

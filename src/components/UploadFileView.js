@@ -2,8 +2,16 @@ import React, {useState} from "react";
 import {Button} from 'react-bootstrap'
 import {Link} from "react-router-dom";
 import {toast} from "react-hot-toast";
+import { readString } from 'react-papaparse'
+import {useAuth} from "../contexts/AuthContext";
+import {addDoc, arrayUnion, collection, doc, updateDoc} from "firebase/firestore";
+import {db} from "../firebase";
+import {forEach} from "react-bootstrap/ElementChildren";
 
 export default function UploadFileView() {
+
+	const {uid} = useAuth();
+
 	const [selectedFile, setSelectedFile] = useState();
 	const [isFilePicked, setIsFilePicked] = useState(false);
 
@@ -13,9 +21,9 @@ export default function UploadFileView() {
 	const changeHandler = (event) => {
 		event.preventDefault()
 		let file = event.target.files[0]
+		setError("")
 		if (!file) return
 		setResult("")
-		setError("")
 		setSelectedFile(file);
 		setIsFilePicked(true);
 		checkIfValidCSV(file)
@@ -30,28 +38,106 @@ export default function UploadFileView() {
 
 	function handleSubmission() {
 		const reader = new FileReader()
-		reader.onload = parseCSV
+		reader.onload = getCSVString
 		reader.readAsText(selectedFile)
 	}
 
 	// Todo: Parse and Upload to Firestore
-	function parseCSV(e) {
+	function getCSVString(e) {
 		let csv = e.target.result.toString()
-		let noError = true
 
-		cleanUp(noError, "5 Recipes successfully created!")
+		readString(csv, {
+			worker: true,
+			complete: parseCSV
+		})
+
 	}
 
-	function cleanUp(noError, text) {
-		if (noError) {
-			setResult(text)
+	async function parseCSV(results) {
+
+		console.log(results.data)
+
+		let error = false
+		let text = (results.data.length - 1) + " Recipes successfully created!"
+
+		// Check CSV Correctness
+		for (let i in results.data) {
+			if (results.data[i].length !== 8) {
+				error = true
+				text = "Oops! Please ensure CSV has all 8 headers, even if they are empty."
+				break
+			}
+
+			for (let j = 0; j < results.data[i].length; j++) {
+				let cell = results.data[i][j]
+
+				if (cell.length === 0 && [0, 1, 3].includes(j)) {
+					error = true
+					text = "Oops! Recipe on row " + i + " does not contain all the required information."
+					break
+				}
+			}
+
+			if (error) break
+		}
+
+		// Found CSV bug. Display error.
+		if (error) {
+			cleanUp(error, text)
+			return
+		}
+
+		await results.data.shift() // Remove header row
+
+		// Upload CSV data to firestore
+		for (let i in results.data) {
+			let r = results.data[i]
+
+			let coreIngredients = []
+			let sideIngredients = []
+			r[1].split(',').forEach((ingredient) => coreIngredients.push({name: ingredient.trim(), quantity: ""}))
+			if (r[2].length !== 0) {
+				r[2].split(',').forEach((ingredient) => sideIngredients.push({name: ingredient.trim(), quantity: ""}))
+			}
+
+			const recipe = {
+				name: r[0],
+				coreIngredients: coreIngredients,
+				sideIngredients: sideIngredients,
+				instructions: r[3].split(','),
+				author: uid,
+				upvotedList: [],
+				downvotedList: [],
+				recipeType: (r[7].toLowerCase() === "no") ? "Private" : "Public",
+				tags: r[4].split(','),
+				image: r[5],
+				blurb: r[6],
+			}
+
+			// Add recipe to database
+			let recipeRef = collection(db, "Recipes");
+			const docRef = await addDoc(recipeRef, recipe)
+
+			// Add recipe id under list of user's created recipes
+			let userCreatedRecipesRef = doc(db, "Users", uid);
+			await updateDoc(userCreatedRecipesRef, { createdRecipes: arrayUnion(docRef.id) });
+
+		}
+
+		cleanUp(false, text) // Completion message
+	}
+
+	function cleanUp(error, text) {
+		if (!error) {
 			toast.success("Recipes Created!")
 			setIsFilePicked(false)
+			setResult(text)
 			setError("")
 			document.getElementById("input").value = null;
 		} else {
+			setResult("")
+			setError(text)
 			setIsFilePicked(false)
-			setError("Oops! ABC has no ingredients. Please fix and re-upload.")
 		}
 	}
 
