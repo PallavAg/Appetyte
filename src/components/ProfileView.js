@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Button} from 'react-bootstrap'
 import {useAuth} from "../contexts/AuthContext";
-import {useHistory} from "react-router-dom";
+import {Link, useHistory} from "react-router-dom";
 import {toast} from "react-hot-toast";
 import {db} from "../firebase";
 import {addDoc, collection} from "firebase/firestore";
@@ -81,9 +81,15 @@ export default function ProfileView() {
 					<div className='pageSubtitle'>EMAIL</div>
 					<div className='pageSubSubtitle'>{currentUser.email}</div>
 					<div style={{'margin-bottom': 10}}>
+						<Link to={{ pathname: `/upload`}}>
+							<Button className="btn-success">{"Upload Recipes"}</Button>
+						</Link >
+					</div>
+					<div style={{'margin-bottom': 10}}>
 						<Button className="btn btn-secondary" onClick={submitFeedback}>{"Submit Feedback"}</Button>
 					</div>
 					<Button className="btn-danger" onClick={handleDelete}>{"Delete Account"}</Button>
+
 				</div>
 			);
 		} else {
