@@ -45,6 +45,7 @@ export default function UploadFileView() {
 	// Todo: Parse and Upload to Firestore
 	function getCSVString(e) {
 		let csv = e.target.result.toString()
+		csv.replace(/\n+$/, "") // Remove trailing newlines
 
 		readString(csv, {
 			worker: true,

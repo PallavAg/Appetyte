@@ -1,15 +1,18 @@
 import React, {useEffect, useState} from "react";
-import {doc, getDoc} from "firebase/firestore";
+import {arrayRemove, doc, getDoc, updateDoc, collection, query, where, getDocs} from "firebase/firestore";
 import firebase, {db} from "../../firebase";
 import Collapsible from "react-collapsible";
 import {useAuth} from "../../contexts/AuthContext";
-import {useLocation} from "react-router-dom";
+import {useHistory, useLocation} from "react-router-dom";
+import {Button} from "react-bootstrap";
+import {toast} from "react-hot-toast";
 
 
 export default function RecipeView(props) {
 
     const {uid} = useAuth();
     const { state } = useLocation(); // Use props.id instead
+    const history = useHistory()
 
     const [error, setError] = useState("");
 
@@ -21,6 +24,7 @@ export default function RecipeView(props) {
     const[notes, setNotes] = useState([]);
     const[author, setAuthor] = useState("");
     const[image, setImage] = useState("");
+    const[dltText, setDltText] = useState("Delete Recipe");
 
     async function getIngredients() {
         // TODO: Will need to modify slightly based on if viewing your created, saved, or just public recipe
@@ -52,10 +56,7 @@ export default function RecipeView(props) {
             setTags(tag);
             setNotes(blurb);
             setImage(imageLink);
-            if (author === uid) {
-                setAuthor("This recipe was created by you");
-            }
-
+            setAuthor(author)
 
         } else {
             // doc.data() will be undefined in this case
@@ -101,36 +102,66 @@ export default function RecipeView(props) {
         return tagItems;
     }
 
-    return (
-        <div className='card' style={{backgroundColor: '#ebebeb', borderRadius: '15px'}}>
-            <div className='pageTitle'>
-                {recipeName}
-            </div>
-            <div>
-                {author}
-            </div>
-            <span style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</span>
+    async function deleteRecipe() {
+        if (dltText === "Delete Recipe") {
+            setDltText("Are you sure? Click again to delete.")
+            return
+        }
 
-            <span className='pageSubtitle'>Core Ingredients</span>
+        setDltText("Deleting...")
+        const id = props.id
+
+        // Delete recipe object
+        await db.collection("Recipes").doc(id).delete()
+
+        // Delete from 'createdRecipes' array
+        const user = doc(db, 'Users', uid);
+        await updateDoc(user, { createdRecipes: arrayRemove(id) }); // Remove as a created recipe
+
+        // Delete from saved arrays
+        const q = query(collection(db, "Users"), where('saved', 'array-contains-any', [id]));
+        const docs = await getDocs(q)
+        docs.forEach((userDoc) => updateDoc(doc(db, 'Users', userDoc.id), { saved: arrayRemove(id) }))
+
+        if (window.location.pathname.includes("cookbook")) window.location.reload(false)
+        else history.push("/cookbook")
+
+        toast.success("Recipe Deleted")
+    }
+
+    return (
+        <div>
+            <div className='card' style={{backgroundColor: '#ebebeb', borderRadius: '15px'}}>
+                <div className='pageTitle'>
+                    {recipeName}
+                </div>
+                {author === uid ? <div>This recipe was created by you</div> : <div></div>}
+                <span style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</span>
+
+                <span className='pageSubtitle'>Core Ingredients</span>
                 <div>
                     <ul>{generateCoreIngredientsList()}</ul>
                 </div>
 
-            <div className='pageSubtitle'>Side Ingredients</div>
+                <div className='pageSubtitle'>Side Ingredients</div>
                 <div>
                     {sideIngredients.length !== 0 ? <ul>{generateSideIngredientsList()}</ul> : <p>No Side Ingredients Required</p>}
                 </div>
-            <div className='pageSubtitle'>Instructions</div>
+                <div className='pageSubtitle'>Instructions</div>
                 <div>
                     <ul>{generateInstructions()}</ul>
                 </div>
-            <img style={{maxWidth: '30%'}} src={image}/>
-            <div className='pageSubtitle'>Tags</div>
+                <img style={{maxWidth: '30%'}} src={image}/>
+                <div className='pageSubtitle'>Tags</div>
                 <div>
                     {generateTagsList()}
                 </div>
-            <div className='pageSubtitle'>Notes</div>
+                <div className='pageSubtitle'>Notes</div>
                 <p>{notes.length === 0 ? "No Notes" : notes}</p>
+            </div>
+            <br/>
+            {author === uid ? <Button variant="outline-danger" onClick={deleteRecipe}>{dltText}</Button> : <></>}
+
         </div>
     );
 }
