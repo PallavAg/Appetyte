@@ -86,9 +86,9 @@ export default function SignUp() {
 		if (!unverifiedUID) return; // User is logged out yet somehow this was called
 
 		await setDoc(doc(db, "Users", unverifiedUID), {
-			firstName: "SampleFirstName",
-			lastName: "SampleLastName",
-			username: "SampleUserName",
+			firstName: "",
+			lastName: "",
+			username: "",
 			saved: [],
 			createdRecipes: []
 		});

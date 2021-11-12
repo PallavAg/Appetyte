@@ -328,6 +328,12 @@ export default function CreateRecipeView() {
         </div>
     );
 
+    function checkProfile(field, type) {
+        const empty = (field.toString().trim().length === 0)
+        if (empty) setError(type + " is empty! Set one to create a recipe.")
+        return empty
+    }
+
     async function createRecipe() {
 
         // Check the user is logged in
@@ -335,6 +341,12 @@ export default function CreateRecipeView() {
             setError("You must be logged in to create a recipe.");
             return;
         }
+
+        // Ensure user has their profile information set
+        const user = (await db.collection("Users").doc(uid).get()).data()
+        if (checkProfile(user.firstName, "First Name")) return
+        if (checkProfile(user.lastName, "Last Name")) return
+        if (checkProfile(user.username, "Username")) return
 
         // Check that it has a name
         if (recipeName.value === "") {
@@ -399,7 +411,7 @@ export default function CreateRecipeView() {
             upvotedList: [],
             downvotedList: [],
             recipeType: switchValue ? "Public" : "Private",
-            tags: tags.split(','),
+            tags: tags.split(',').map(tag => tag.trim()),
             image: image,
             blurb: notes,
         }
