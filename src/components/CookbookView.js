@@ -22,7 +22,10 @@ export default function CookbookView() {
     const [createdRecipes, setCreatedRecipes] = useState([]);
     const [savedRecipes, setSavedRecipes] = useState([]);
     const [tableLabel, setTableLabel] = useState("");
-    // const { state } = useLocation();
+
+    const { profileID } = useLocation();
+    const [username, setUserName] = useState("");
+    const [fullName, setFullName] = useState("");
 
     const [error, setError] = useState("");
 
@@ -40,18 +43,23 @@ export default function CookbookView() {
     const {uid} = useAuth();
 
     async function getRecipes() {
-        console.log("get recipes");
+        setDisplayedRecipes([])
+        setFullName("")
+        setUserName("")
 
         // Load created recipe ids
         let createdRecipes = []
         // Load saved recipe ids
         let savedRecipes = []
 
-        const qUser = query(doc(db, "Users", uid));
+        let qUser = query(doc(db, "Users", profileID ? profileID : uid));
+
         const userSnapshot = await getDoc(qUser);
         if (userSnapshot.exists()) {
             createdRecipes = userSnapshot.data().createdRecipes;
             savedRecipes = userSnapshot.data().saved;
+            setFullName(userSnapshot.data().firstName + " " + userSnapshot.data().lastName)
+            setUserName(userSnapshot.data().username)
         }
 
         // Perform lookup in recipe collection on these saved recipes
@@ -62,7 +70,11 @@ export default function CookbookView() {
         const recipesSnapshot = await getDocs(qLookup);
         recipesSnapshot.forEach((doc) => {
             if (createdRecipes.includes(doc.id)) {
-                createdRecipesData.push({id: doc.id, data: doc.data()})
+                if (profileID) {
+                    if (doc.data().recipeType !== "Private") {
+                        createdRecipesData.push({id: doc.id, data: doc.data()})
+                    }
+                } else createdRecipesData.push({id: doc.id, data: doc.data()})
             }
             if (savedRecipes.includes(doc.id)) {
                 savedRecipesData.push({id: doc.id, data: doc.data()})
@@ -71,6 +83,10 @@ export default function CookbookView() {
 
         // Set recipes for use throughout the page
         setCreatedRecipes(createdRecipesData);
+
+        // Prevent ever showing saved recipes
+        if (profileID) savedRecipesData = createdRecipesData
+
         setSavedRecipes(savedRecipesData);
 
         // Display results in case user hasn't changed the segmented control yet
@@ -87,7 +103,7 @@ export default function CookbookView() {
         if (newValue === SearchType.CREATED) {
             setDisplayedRecipes([...createdRecipes]);
         }
-        else if (newValue == SearchType.SAVED) {
+        else if (newValue === SearchType.SAVED) {
             setDisplayedRecipes([...savedRecipes]);
         }
     }
@@ -95,7 +111,7 @@ export default function CookbookView() {
     function updateResults() {
         return displayedRecipes.map((recipe) =>
             <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}} onClick={() => {setViewingID(recipe.id)}}>
-                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data, interactiveElement: 'none', viewingState: setViewing})}
+                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data, interactiveElement: profileID ? 'block' : 'none', viewingState: setViewing})}
             </div>
         );
 
@@ -141,20 +157,14 @@ export default function CookbookView() {
     }
 
     useEffect(() => {
-        // if (state !== undefined) {
-        //     searchQuery.current.value = state;
-        //
-        // } else {
-        //     searchQuery.current.value = "";
-        // }
-
-        if (uid !== null) {
-            getRecipes()
-        } else {
-            setError("Error: You must be logged in to view your cookbook.");
+        if (uid === null) {
+            setError("Error: You must be logged in to view this.");
+            return;
         }
 
-    }, []);
+        getRecipes()
+
+    }, [profileID]);
 
     function ShowNoResults() {
         if (displayedRecipes.length === 0) {
@@ -168,9 +178,10 @@ export default function CookbookView() {
         <div className='contentInsets'>
             {!viewing ?
                 <div>
-                    <div className='pageTitle'> Cookbook </div>
-                    <div style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</div>
-                    <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem'}}>
+                    <div className='pageTitle' style={{textAlign: profileID ? 'center' : ''}}> {profileID ? fullName : "Cookbook"} </div>
+                    {profileID ? <h5 style={{textAlign: 'center', marginTop: '-20px'}} >{"'" + username + "'"}</h5> : <></>}
+                    <div style={{color: 'red', paddingTop: error.length === 0 ? '0rem' : '1rem', fontSize: 17}}>{error}</div>
+                    <div style={{backgroundColor: 'steelblue', borderRadius: 15, padding: '1rem', display: profileID ? 'none' : 'block'}}>
                         {/*<div>{JSON.stringify(testOutput)}</div>*/}
                         <Container>
                             <div style={{color: 'white', textAlign: 'center', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: 17,}}>
@@ -207,10 +218,9 @@ export default function CookbookView() {
                                     onClick={e => searchForRecipe(e)}>Search</Button>
                         </Form>
                         <Form className='leftContentInsets'>
-
                         </Form>
                     </div>
-                    <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', borderRadius: '0px 0px 15px 15px'}}>
+                    <div className='leftAndRightContentInsets' style={{backgroundColor: 'lightgray', paddingTop: '1rem', borderRadius: profileID ? '15px 15px 15px 15px' : '0px 0px 15px 15px'}}>
                         {tableLabel.length ? <div style={{textAlign: 'center', fontSize: 20, paddingBottom: '1rem'}}>
                             <ShowNoResults/>
                         </div> : <></>}
@@ -220,7 +230,7 @@ export default function CookbookView() {
             :
                 <div>
                     <h2 onClick={() => {setViewing(!viewing)}}>←</h2>
-                    {React.createElement(RecipeView, {id: viewingID})}
+                    {React.createElement(RecipeView, {id: viewingID, viewingState: setViewing})}
                 </div>
             }
         </div>

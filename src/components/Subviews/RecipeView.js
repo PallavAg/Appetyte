@@ -3,7 +3,7 @@ import {arrayRemove, doc, getDoc, updateDoc, collection, query, where, getDocs} 
 import firebase, {db} from "../../firebase";
 import Collapsible from "react-collapsible";
 import {useAuth} from "../../contexts/AuthContext";
-import {useHistory, useLocation} from "react-router-dom";
+import {Link, useHistory, useLocation} from "react-router-dom";
 import {Button} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 
@@ -129,16 +129,19 @@ export default function RecipeView(props) {
         toast.success("Recipe Deleted")
     }
 
-    function viewProfile() {
-
-    }
-
     return (
         <div>
             <div className='card' style={{backgroundColor: '#ebebeb', borderRadius: '15px'}}>
-                <h4>
-                    Chef: <b><u style={{textDecorationColor: 'blue'}} onClick={viewProfile}>{username}</u></b>
-                </h4>
+
+                {author !== uid ?
+                    <h4>
+                        {"Chef: "}
+                        <Link onClick={() => {if (props.viewingState) props.viewingState(false)}} to={{pathname: `/cookbook`, profileID: author}}>
+                            <b>{username}</b>
+                        </Link>
+                    </h4>
+                    : <></>}
+
                 <div className='pageTitle'>
                     {recipeName}
                 </div>
