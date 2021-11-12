@@ -23,6 +23,7 @@ export default function RecipeView(props) {
     const[tags, setTags] = useState([]);
     const[notes, setNotes] = useState([]);
     const[author, setAuthor] = useState("");
+    const[username, setName] = useState("");
     const[image, setImage] = useState("");
     const[dltText, setDltText] = useState("Delete Recipe");
 
@@ -57,6 +58,7 @@ export default function RecipeView(props) {
             setNotes(blurb);
             setImage(imageLink);
             setAuthor(author)
+            setName((await getDoc(doc(db, "Users", author))).data().username)
 
         } else {
             // doc.data() will be undefined in this case
@@ -66,9 +68,7 @@ export default function RecipeView(props) {
     }
 
     useEffect(()=>{
-        getIngredients().then((r) =>
-            console.log(r)
-        );
+        getIngredients().then(r => {});
     }, []);
 
     function generateCoreIngredientsList() {
@@ -129,13 +129,20 @@ export default function RecipeView(props) {
         toast.success("Recipe Deleted")
     }
 
+    function viewProfile() {
+
+    }
+
     return (
         <div>
             <div className='card' style={{backgroundColor: '#ebebeb', borderRadius: '15px'}}>
+                <h4>
+                    Chef: <b><u style={{textDecorationColor: 'blue'}} onClick={viewProfile}>{username}</u></b>
+                </h4>
                 <div className='pageTitle'>
                     {recipeName}
                 </div>
-                {author === uid ? <div>This recipe was created by you</div> : <div></div>}
+                {author === uid ? <div>This recipe was created by you</div> : <div style={{marginBottom: '-30px'}}/>}
                 <span style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</span>
 
                 <span className='pageSubtitle'>Core Ingredients</span>
