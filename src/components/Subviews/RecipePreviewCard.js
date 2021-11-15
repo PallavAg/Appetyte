@@ -21,6 +21,7 @@ export default function RecipePreviewCard(props) {
     const [voteCount, setVoteCount] = useState(0)
 
     const [hideElementsOnCookbook, setHideElementsOnCookbook] = useState(props.interactiveElement)
+    const viewingSavedView = (props.savedView === 1)
 
     const recipeRef = doc(db, "Recipes", recipeID);
 
@@ -53,6 +54,7 @@ export default function RecipePreviewCard(props) {
         else await updateDoc(userRef, { saved: arrayUnion(recipeID) }); // Un-save recipe
 
         getSavedState()
+        if (viewingSavedView && saved) {document.getElementById(props.id).remove()}
 
     }
 
@@ -113,11 +115,11 @@ export default function RecipePreviewCard(props) {
 
     return (
 
-        <div className='smallCard'>
+        <div id={props.id} className='smallCard'>
             <div className='leftContentInsets'>
                 <div style={{display: 'flex'}}>
                     <div className='pageSubtitle' onClick={() => {props.viewingState(true)}}><u style={{ textDecorationColor: 'blue'}}>{recipeName}</u></div>
-                    <Button style={{boxShadow: 'none', margin: '0.5rem', display: hideElementsOnCookbook}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
+                    <Button style={{boxShadow: 'none', margin: '0.5rem', display: viewingSavedView ? 'block' : hideElementsOnCookbook}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
                 </div>
                 <div>
                     <ul>{generateCoreIngredientsList()}</ul>

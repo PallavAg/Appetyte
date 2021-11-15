@@ -111,7 +111,7 @@ export default function CookbookView() {
     function updateResults() {
         return displayedRecipes.map((recipe) =>
             <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem'}} onClick={() => {setViewingID(recipe.id)}}>
-                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data, interactiveElement: profileID ? 'block' : 'none', viewingState: setViewing})}
+                {React.createElement(RecipePreviewCard, {key: recipe.id, id: recipe.id, recipe: recipe.data, interactiveElement: profileID ? 'block' : 'none', viewingState: setViewing, savedView: segmentedCtrlState})}
             </div>
         );
 
