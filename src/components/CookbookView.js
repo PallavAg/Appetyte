@@ -12,6 +12,7 @@ import RecipeView from "./Subviews/RecipeView";
 const SearchType = {
     CREATED: 0,
     SAVED: 1,
+    SHARED: 2
 }
 
 export default function CookbookView() {
@@ -21,6 +22,7 @@ export default function CookbookView() {
     const [displayedRecipes, setDisplayedRecipes] = useState([]);
     const [createdRecipes, setCreatedRecipes] = useState([]);
     const [savedRecipes, setSavedRecipes] = useState([]);
+    const [sharedRecipes, setSharedRecipes] = useState([]);
     const [tableLabel, setTableLabel] = useState("");
 
     const { profileID } = useLocation();
@@ -36,7 +38,7 @@ export default function CookbookView() {
     const [viewingID, setViewingID] = useState()
 
     // TODO: DELETE THIS
-    //const [testOutput, setTestOutput] = useState("");
+    const [testOutput, setTestOutput] = useState("");
 
     const searchQuery = useRef("");
 
@@ -51,6 +53,7 @@ export default function CookbookView() {
         let createdRecipes = []
         // Load saved recipe ids
         let savedRecipes = []
+        let sharedRecipes = []
 
         let qUser = query(doc(db, "Users", profileID ? profileID : uid));
 
@@ -58,6 +61,9 @@ export default function CookbookView() {
         if (userSnapshot.exists()) {
             createdRecipes = userSnapshot.data().createdRecipes;
             savedRecipes = userSnapshot.data().saved;
+            if (userSnapshot.data().shared != null) {
+                sharedRecipes = userSnapshot.data().shared;
+            }
             setFullName(userSnapshot.data().firstName + " " + userSnapshot.data().lastName)
             setUserName(userSnapshot.data().username)
         }
@@ -66,6 +72,7 @@ export default function CookbookView() {
         const qLookup = query(collection(db, "Recipes"))
         let createdRecipesData = []
         let savedRecipesData = []
+        let sharedRecipesData = []
         // Note: see comment in search page for why I couldn't do where(documentId(), "in", cookBookRecipes)
         const recipesSnapshot = await getDocs(qLookup);
         recipesSnapshot.forEach((doc) => {
@@ -79,6 +86,9 @@ export default function CookbookView() {
             if (savedRecipes.includes(doc.id)) {
                 savedRecipesData.push({id: doc.id, data: doc.data()})
             }
+            if (sharedRecipes !== null && sharedRecipes.includes(doc.id)) {
+                sharedRecipesData.push({id: doc.id, data: doc.data()})
+            }
         })
 
         // Set recipes for use throughout the page
@@ -89,11 +99,17 @@ export default function CookbookView() {
 
         setSavedRecipes(savedRecipesData);
 
+        setSharedRecipes(sharedRecipesData);
+
         // Display results in case user hasn't changed the segmented control yet
         if (segmentedCtrlState === SearchType.CREATED) {
             setDisplayedRecipes([...createdRecipesData]);
-        } else {
+        }
+        else if (segmentedCtrlState === SearchType.SAVED) {
             setDisplayedRecipes([...savedRecipesData]);
+        }
+        else if (segmentedCtrlState === SearchType.SHARED) {
+            setDisplayedRecipes([...sharedRecipesData]);
         }
 
     }
@@ -105,6 +121,9 @@ export default function CookbookView() {
         }
         else if (newValue === SearchType.SAVED) {
             setDisplayedRecipes([...savedRecipes]);
+        }
+        else if (newValue === SearchType.SHARED) {
+            setDisplayedRecipes([...sharedRecipes]);
         }
     }
 
@@ -127,6 +146,9 @@ export default function CookbookView() {
         }
         else if (segmentedCtrlState === SearchType.SAVED) {
             allRecipes = [...savedRecipes];
+        }
+        else if (segmentedCtrlState === SearchType.SHARED) {
+            allRecipes = [...sharedRecipes];
         }
 
 
@@ -194,7 +216,8 @@ export default function CookbookView() {
                                         name="oneDisabled"
                                         options={[
                                             { label: "Created Recipes", value: 0, default: true},
-                                            { label: "Saved Recipes", value: 1}
+                                            { label: "Saved Recipes", value: 1},
+                                            { label: "Shared with Me", value: 2}
                                         ]}
                                         setValue={newValue => updateSegmentedCtrlState(newValue)}
                                         style={{ width: 600, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '15px', fontSize: 15}} // purple400
