@@ -49,6 +49,7 @@
     ]
   },
   "devDependencies": {
-    "@material/switch": "^13.0.0"
+    "@material/switch": "^13.0.0",
+    "reactjs-popup": "^2.0.5"
   }
 }
