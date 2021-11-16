@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {db} from "../../firebase";
-import {Button} from "react-bootstrap";
+import {Button, Row, Col} from "react-bootstrap";
 import {useAuth} from "../../contexts/AuthContext";
 import {doc, updateDoc, arrayUnion, arrayRemove} from "firebase/firestore";
 import {toast} from "react-hot-toast";
@@ -24,6 +24,8 @@ export default function RecipePreviewCard(props) {
     const viewingSavedView = (props.savedView === 1)
 
     const recipeRef = doc(db, "Recipes", recipeID);
+
+    const[image, setImage] = useState(props.recipe.image);
 
     function generateCoreIngredientsList() {
         const coreItems = coreIngredients.map((ingredient) =>
@@ -117,22 +119,30 @@ export default function RecipePreviewCard(props) {
 
         <div id={props.id} className='smallCard'>
             <div className='leftContentInsets'>
-                <div style={{display: 'flex'}}>
-                    <div className='pageSubtitle' onClick={() => {props.viewingState(true)}}><u style={{ textDecorationColor: 'blue'}}>{recipeName}</u></div>
-                    <Button style={{boxShadow: 'none', margin: '0.5rem', display: viewingSavedView ? 'block' : hideElementsOnCookbook}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
-                </div>
-                <div>
-                    <ul>{generateCoreIngredientsList()}</ul>
-                </div>
+                <Row>
+                    <Col>
+                        <div style={{display: 'flex'}}>
+                            <div className='pageSubtitle' onClick={() => {props.viewingState(true)}}><u style={{ textDecorationColor: 'blue'}}>{recipeName}</u></div>
+                            <Button style={{boxShadow: 'none', margin: '0.5rem', display: viewingSavedView ? 'block' : hideElementsOnCookbook}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
+                        </div>
 
-                {/*Begin Voting UI*/}
-                <hr style={{display: hideElementsOnCookbook}}/>
+                        <div>
+                            <ul>{generateCoreIngredientsList()}</ul>
+                        </div>
 
-                <div style={{paddingBottom: '1rem', display: hideElementsOnCookbook}}>
-                    <Button style={{boxShadow: 'none'}} variant={upvoted ? "primary btn-sm" : "outline-primary btn-sm"} onClick={performUpvote}><b>↑</b></Button>
-                    <b style={{padding: '0.5rem'}}>{`${voteCount}`}</b>
-                    <Button style={{boxShadow: 'none'}} variant={downvoted ? "danger btn-sm" : "outline-danger btn-sm"} onClick={performDownvote}><b>↓</b></Button>
-                </div>
+                        {/*Begin Voting UI*/}
+                        <hr style={{display: hideElementsOnCookbook}}/>
+
+                        <div style={{paddingBottom: '1rem', display: hideElementsOnCookbook}}>
+                            <Button style={{boxShadow: 'none'}} variant={upvoted ? "primary btn-sm" : "outline-primary btn-sm"} onClick={performUpvote}><b>↑</b></Button>
+                            <b style={{padding: '0.5rem'}}>{`${voteCount}`}</b>
+                            <Button style={{boxShadow: 'none'}} variant={downvoted ? "danger btn-sm" : "outline-danger btn-sm"} onClick={performDownvote}><b>↓</b></Button>
+                        </div>
+                    </Col>
+                    <Col sm={"auto"}>
+                        <img style={{maxHeight: '150px', align: "right", margin: "1rem", boxShadow: "0px 0px 5px #aaaaaa"}} src={image}/>
+                    </Col>
+                </Row>
             </div>
         </div>
 
