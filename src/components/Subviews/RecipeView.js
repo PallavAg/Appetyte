@@ -32,6 +32,7 @@ export default function RecipeView(props) {
     const[username, setName] = useState("");
     const[image, setImage] = useState("");
     const[dltText, setDltText] = useState("Delete Recipe");
+    const[servingCount, setServingCount] = useState(1);
 
     async function getIngredients() {
         //const recipeCollection = "CreatedRecipes";
@@ -211,6 +212,32 @@ export default function RecipeView(props) {
         toast.success("Recipe Deleted")
     }
 
+    function updateIngredients(arr, diff) {
+        for (let i = 0; i < arr.length; i++) {
+            arr[i].name = arr[i].quantity + " " + arr[i].name
+            arr[i].quantity = ""
+
+            let ingredients = arr[i].name.split(" ").filter(n => n)
+            let firstWord = ingredients[0]
+
+            if (!isNaN(firstWord)) {
+                ingredients[0] = ((parseInt(firstWord) / servingCount) * (servingCount + diff)) + ""
+                arr[i].name = ingredients.join(" ")
+            }
+        }
+
+        return arr
+    }
+
+    function updateServingCount(diff) {
+        if (servingCount === 1 && diff === -1) return
+
+        setServingCount(Math.max(servingCount + diff, 1))
+        setCoreIngredients(updateIngredients([...coreIngredients], diff))
+        setSideIngredients(updateIngredients([...sideIngredients], diff))
+
+    }
+
     return (
         <div>
             <div className='card' style={{backgroundColor: '#ebebeb', borderRadius: '15px'}}>
@@ -265,6 +292,14 @@ export default function RecipeView(props) {
                 <div>
                     {sideIngredients.length !== 0 ? <ul>{generateSideIngredientsList()}</ul> : <p>No Side Ingredients Required</p>}
                 </div>
+
+                <div>
+                    <b className='pageSubtitle'>{"Serving Size: "}</b>
+                    <b style={{padding: '0.5rem', fontSize: '20px'}}>{`${servingCount}`}</b>
+                    <Button style={{boxShadow: 'none'}} variant={"outline-primary btn-sm"} onClick={() => {updateServingCount(1)}}><b>↑</b></Button>
+                    <Button style={{boxShadow: 'none', margin: '5px'}} variant={"outline-primary btn-sm"} onClick={() => {updateServingCount(-1)}}><b>↓</b></Button>
+                </div>
+
                 <div className='pageSubtitle'>Instructions</div>
                 <div>
                     <ul>{generateInstructions()}</ul>

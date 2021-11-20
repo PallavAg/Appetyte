@@ -422,7 +422,7 @@ export default function SearchPage() {
 
                 </div>
                 :
-                <div>
+                <div style={{width: '50%', margin: 'auto'}}>
                     <h2 onClick={() => {setViewing(!viewing)}}>←</h2>
                     {React.createElement(RecipeView, {id: viewingID})}
                 </div>

@@ -140,7 +140,7 @@ export default function RecipePreviewCard(props) {
                         </div>
                     </Col>
                     <Col sm={"auto"}>
-                        <img style={{maxHeight: '150px', align: "right", margin: "1rem", boxShadow: "0px 0px 5px #aaaaaa"}} src={image}/>
+                        <img style={{maxHeight: '150px', align: "right", margin: "1rem", boxShadow: "0px 0px 5px #aaaaaa", borderRadius: '15px'}} src={image}/>
                     </Col>
                 </Row>
             </div>

@@ -83,7 +83,7 @@ export default function CookbookView() {
                     }
                 } else createdRecipesData.push({id: doc.id, data: doc.data()})
             }
-            if (savedRecipes.includes(doc.id)) {
+            if (savedRecipes?.includes(doc.id)) {
                 savedRecipesData.push({id: doc.id, data: doc.data()})
             }
             if (sharedRecipes !== null && sharedRecipes.includes(doc.id)) {
