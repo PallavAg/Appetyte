@@ -7,6 +7,8 @@ import {useAuth} from "../../contexts/AuthContext";
 import {Link, useHistory, useLocation} from "react-router-dom";
 import {Button, Form} from "react-bootstrap";
 import {toast} from "react-hot-toast";
+import RecipePreviewCard from "./RecipePreviewCard";
+import CommentView from "./CommentView";
 
 
 export default function RecipeView(props) {
@@ -33,6 +35,7 @@ export default function RecipeView(props) {
     const[image, setImage] = useState("");
     const[dltText, setDltText] = useState("Delete Recipe");
     const[servingCount, setServingCount] = useState(1);
+    const [comments, setComments] = useState([]);
 
     async function getIngredients() {
         //const recipeCollection = "CreatedRecipes";
@@ -57,6 +60,7 @@ export default function RecipeView(props) {
             const author = recipeSnapshot.data()["author"];
             const imageLink = recipeSnapshot.data()["image"];
             const sharedUsers = recipeSnapshot.data()["shared"];
+            const comment = recipeSnapshot.data()["comments"];
             setRecipeName(name);
             setCoreIngredients(core);
             setSideIngredients(side);
@@ -69,7 +73,9 @@ export default function RecipeView(props) {
             if (sharedUsers) {
                 setAllSharedNames(sharedUsers);
             }
-
+            if (comment) {
+                setComments(comment)
+            }
         } else {
             // doc.data() will be undefined in this case
             console.log("No such document!");
@@ -314,6 +320,12 @@ export default function RecipeView(props) {
             </div>
             <br/>
             {author === uid ? <Button variant="outline-danger" onClick={deleteRecipe}>{dltText}</Button> : <></>}
+
+            <div className='card' style={{backgroundColor: '#ebebeb', borderRadius: '15px', marginTop: "1rem"}}>
+                <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem', }} onClick={() => {}}>
+                    {React.createElement(CommentView, {comments: comments})}
+                </div>
+            </div>
 
         </div>
     );
