@@ -323,7 +323,7 @@ export default function RecipeView(props) {
 
             <div className='card' style={{backgroundColor: '#ebebeb', borderRadius: '15px', marginTop: "1rem"}}>
                 <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem', }} onClick={() => {}}>
-                    {React.createElement(CommentView, {comments: comments})}
+                    {React.createElement(CommentView, {comments: comments, recipeId: props.id})}
                 </div>
             </div>
 
