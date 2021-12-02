@@ -1,29 +1,33 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Button, Form, Row, Col} from "react-bootstrap";
 import Switch from "react-switch";
 import BootstrapTable from "react-bootstrap-table-next";
 import firebase, {db} from "../firebase";
 import {BsFillTrashFill} from "react-icons/bs";
-import {doc, collection, addDoc, setDoc, updateDoc, arrayUnion} from "firebase/firestore";
+import {doc, collection, addDoc, setDoc, updateDoc, arrayUnion, getDoc} from "firebase/firestore";
 import {useAuth} from "../contexts/AuthContext";
 import RecipePreviewCard from "./Subviews/RecipePreviewCard";
 import {toast} from "react-hot-toast";
+import {jsonToCSV} from "react-papaparse";
 
-export default function CreateRecipeView() {
+export default function CreateRecipeView(props) {
 
     const {uid} = useAuth();
+
+    const [asdf, setAsdf] = useState("");
 
     const [coreIngredientNames, setCoreIngredientNames] = useState({})
     const [coreIngredientQuantities, setCoreIngredientQuantities] = useState({})
     const [sideIngredientNames, setSideIngredientNames] = useState({})
     const [sideIngredientQuantities, setSideIngredientQuantities] = useState({})
-    const [instructions, setInstructions] = useState({})
+    const [instructions, setInstructions] = useState({"0":"test0", "1":"test1", "2":"test2"})
     const [image, setImage] = useState("")
+    const [editState, setEditState] = useState("Create")
 
     const [instructionForms, setInstructionForms] = useState(
         [
-            { id: "1", name: addInstructionForm("0"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 0)}/> },
-            { id: "2", name: addInstructionForm("1"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 1)}/> },
+            { id: "0", name: addInstructionForm("0"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 0)}/> },
+            { id: "1", name: addInstructionForm("1"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 1)}/> },
         ]
     );
     const [coreIngredientForms, setCoreIngredientForms] = useState(
@@ -80,6 +84,7 @@ export default function CreateRecipeView() {
     //            3 -> sideIngredientQuantities
     //            4 -> instructions
     const setField = (field, value, id, whichList) => {
+        //setError(value.toString() + id.toString());
         switch (whichList) {
             case 0:
                 const copy1 = coreIngredientNames;
@@ -109,7 +114,7 @@ export default function CreateRecipeView() {
             default:
                 break;
         }
-
+        setError(JSON.stringify(instructions));
     }
 
     function addCoreIngredientNameForm(id) {
@@ -161,15 +166,24 @@ export default function CreateRecipeView() {
     }
 
     function addInstructionForm(id) {
-        return (<Form>
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                <Form.Control
-                    type="name"
-                    placeholder={"Instruction"}
-                    onChange={e => setField('name', e.target.value, id, 4)}
-                />
-            </Form.Group>
-        </Form>)
+
+        return (//show => {
+
+            <div><Form>
+                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                    <Form.Control
+                        type="name"
+                        placeholder={"Instruction"}
+                        value={asdf}
+                        onChange={e => {setAsdf(e.target.value)}}
+                        // value={instructions[id.toString()]}
+                        // onChange={e => setField('name', e.target.value, id, 4)}
+                    />
+                </Form.Group>
+            </Form>
+            </div>
+        )
+        //})
     }
 
     function deleteIngredient(e, index) {
@@ -192,7 +206,7 @@ export default function CreateRecipeView() {
 
     function addInstructionRow() {
         let index = instructionForms.length
-        setInstructionForms(products => ([...products, {id: index, name: addInstructionForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
+        setInstructionForms(insts => ([...insts, {id: index, name: addInstructionForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
     }
 
     function addCoreIngredientRow() {
@@ -213,18 +227,108 @@ export default function CreateRecipeView() {
         //State changes according to switch
     };
 
-    let recipeName = useRef();
+    const [recipeName, setRecipeName] = useState("");
     const [tags, setTags] = useState("");
     const [notes, setNotes] = useState("");
 
     const [switchValue, setSwitchValue] = useState(true);
     const [error, setError] = useState("");
 
+    async function fillInformation() {
+        const recipeId =
+            "DDLJ8Y7YN5wfv7UG0x2F";//props.id;
+        let recipeSnapshot;
+        recipeSnapshot = await getDoc(doc(db, "Recipes", recipeId));
+        if (recipeSnapshot.exists) {
+            const core = recipeSnapshot.data()["coreIngredients"];
+            const side = recipeSnapshot.data()["sideIngredients"];
+            const steps = recipeSnapshot.data()["instructions"];
+            const tag = recipeSnapshot.data()["tags"];
+            const blurb = recipeSnapshot.data()["blurb"];
+            const name = recipeSnapshot.data()["name"];
+            const imageLink = recipeSnapshot.data()["image"];
+            const recipeType = recipeSnapshot.data()["recipeType"];
+            setRecipeName(name);
+            // setCoreIngredients(core);
+            // setSideIngredients(side);
+
+            //setInstructions(steps);
+            //setError(JSON.stringify(instructions))
+            setError(asdf)
+            setInstructionForms([]);
+            for (let i = 0; i < Object.keys(steps).length; i++) {
+
+
+                // const copy5 = instructions;
+                // copy5[i.toString()] = steps[i.toString()];
+                // setInstructions(copy5);
+                addInstructionRow();
+                // instructionForms.push({ id: (i+1).toString(), name: addInstructionForm(i.toString()), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, i)}/> });
+            }
+
+            setTags(tag);
+            setNotes(blurb);
+            setImage(imageLink);
+
+            if (recipeType == "Public") {
+                setSwitchValue(true);
+            } else {
+                setSwitchValue(false);
+            }
+            // setAuthor(author);
+            // setName((await getDoc(doc(db, "Users", author))).data().username);
+            // if (sharedUsers) {
+            //     setAllSharedNames(sharedUsers);
+            // }
+            // if (comment) {
+            //     setComments(comment)
+            // }
+        } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+        }
+    }
+
+    useEffect(() => {
+
+        if (true) {
+            // TODO: Restore the original if statement!
+        //if (props.areEditing) {
+            fillInformation();
+
+            // Update button text
+            setEditState("Update");
+        } else {
+            // Update button text
+            setEditState("Create");
+        }
+    }, []);
+
+    function addRandoForm() {
+
+        return (//show => {
+
+            <Form>
+                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                    <Form.Control
+                        type="name"
+                        placeholder={"Instruction"}
+                        value={asdf}
+                        onChange={e => {setAsdf(e.target.value)}}
+                        // value={instructions[id.toString()]}
+                        // onChange={e => setField('name', e.target.value, id, 4)}
+                    />
+                </Form.Group>
+            </Form>
+        )
+        //})
+    }
+
     return (
         <div className='contentInsets' style={{paddingRight: '50%'}}>
-            <div className='pageTitle'>Create Recipe</div>
+            <div className='pageTitle'>{editState} Recipe</div>
             <div className='pageSubtitle'>Recipe Name</div>
-            <div><Form><Form.Control size='lg' placeholder='Recipe Name' ref={(ref) => {recipeName = ref}}/></Form></div>
+            <div><Form><Form.Control size='lg' placeholder='Recipe Name' value={recipeName} onChange={e => setRecipeName(e.target.value)}/></Form></div>
             <br/>
 			<div className='pageSubtitle'>Core Ingredients</div>
             <BootstrapTable
@@ -278,10 +382,10 @@ export default function CreateRecipeView() {
 			<br/>
 
             <div className='pageSubtitle'>Tags</div>
-            <div><Form><Form.Control size='lg' placeholder='Enter up to 5 comma seperated tags' onChange={e => setTags(e.target.value)}/></Form></div>
+            <div><Form><Form.Control size='lg' placeholder='Enter up to 5 comma seperated tags' value={tags} onChange={e => setTags(e.target.value)}/></Form></div>
 
             <div className='pageSubtitle'>Image</div>
-            <div><Form><Form.Control size='lg' placeholder='Enter image link'onChange={e => setImage(e.target.value)}/></Form></div>
+            <div><Form><Form.Control size='lg' placeholder='Enter image link'value={image} onChange={e => setImage(e.target.value)}/></Form></div>
 
            {/*<div>*/}
            {/*     <input type="file" name="file" onChange={changeHandler} />*/}
@@ -306,7 +410,7 @@ export default function CreateRecipeView() {
 
 
             <div className='pageSubtitle'>Other Information</div>
-            <div><Form><Form.Control as='textarea' placeholder='Notes' rows='4' onChange={e => setNotes(e.target.value)}/></Form></div>
+            <div><Form><Form.Control as='textarea' placeholder='Notes' rows='4' value={notes} onChange={e => setNotes(e.target.value)}/></Form></div>
 
             <div style={{marginTop: "1.5rem"}}>
                 <label style={{fontSize: 22, paddingRight: '10px', verticalAlign: 'top'}}>Is Public</label>
@@ -321,7 +425,7 @@ export default function CreateRecipeView() {
             <div style={{color: 'red', paddingTop: '1rem', fontSize: 17}}>{error}</div>
             <div>
                 <Button style={{width: "150px", marginTop: "2rem"}} onClick={() => createRecipe()}>
-                    Create
+                    {editState}
                 </Button>
             </div>
 
@@ -349,7 +453,7 @@ export default function CreateRecipeView() {
         if (checkProfile(user.username, "Username")) return
 
         // Check that it has a name
-        if (recipeName.value === "") {
+        if (recipeName === "") {
             setError("You must provide a name for your recipe.");
             return;
         }
@@ -403,7 +507,7 @@ export default function CreateRecipeView() {
         }
 
         const recipe = {
-            name: recipeName.value,
+            name: recipeName,
             coreIngredients: coreIngredients,
             sideIngredients: sideIngredients,
             instructions: instructions,
