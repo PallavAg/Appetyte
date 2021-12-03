@@ -18,30 +18,31 @@ export default function CreateRecipeView(props) {
 
     const [coreIngredientNames, setCoreIngredientNames] = useState({})
     const [coreIngredientQuantities, setCoreIngredientQuantities] = useState({})
-    const [sideIngredientNames, setSideIngredientNames] = useState({})
-    const [sideIngredientQuantities, setSideIngredientQuantities] = useState({})
+    const [sideIngredientNames, setSideIngredientNames] = useState([])
+    const [sideIngredientQuantities, setSideIngredientQuantities] = useState([])
+    // Todo: change this initial state!!
     const [instructions, setInstructions] = useState({"0":"test0", "1":"test1", "2":"test2"})
     const [image, setImage] = useState("")
     const [editState, setEditState] = useState("Create")
 
-    const [instructionForms, setInstructionForms] = useState(
-        [
-            { id: "0", name: addInstructionForm("0"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 0)}/> },
-            { id: "1", name: addInstructionForm("1"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 1)}/> },
-        ]
-    );
-    const [coreIngredientForms, setCoreIngredientForms] = useState(
-        [
-            { quantity: addCoreIngredientQuantityForm("0"), name: addCoreIngredientNameForm("0"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 0)}/> },
-            { quantity: addCoreIngredientQuantityForm("1"), name: addCoreIngredientNameForm("1"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 1)}/> },
-        ]
-    )
-    const [sideIngredientForms, setSideIngredientForms] = useState(
-        [
-            { quantity: addSideIngredientQuantityForm("0"), name: addSideIngredientNameForm("0"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 0)}/> },
-            { quantity: addSideIngredientQuantityForm("1"), name: addSideIngredientNameForm("1"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 1)}/> },
-        ]
-    )
+    // const [instructionForms, setInstructionForms] = useState(
+    //     [
+    //         { id: "0", name: addInstructionForm("0"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 0)}/> },
+    //         { id: "1", name: addInstructionForm("1"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 1)}/> },
+    //     ]
+    // );
+    // const [coreIngredientForms, setCoreIngredientForms] = useState(
+    //     [
+    //         { quantity: addCoreIngredientQuantityForm("0"), name: addCoreIngredientNameForm("0"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 0)}/> },
+    //         { quantity: addCoreIngredientQuantityForm("1"), name: addCoreIngredientNameForm("1"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 1)}/> },
+    //     ]
+    // )
+    // const [sideIngredientForms, setSideIngredientForms] = useState(
+    //     [
+    //         { quantity: addSideIngredientQuantityForm("0"), name: addSideIngredientNameForm("0"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 0)}/> },
+    //         { quantity: addSideIngredientQuantityForm("1"), name: addSideIngredientNameForm("1"), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, 1)}/> },
+    //     ]
+    // )
 
     const ingredientColumns = [
         {
@@ -114,7 +115,6 @@ export default function CreateRecipeView(props) {
             default:
                 break;
         }
-        setError(JSON.stringify(instructions));
     }
 
     function addCoreIngredientNameForm(id) {
@@ -205,18 +205,39 @@ export default function CreateRecipeView(props) {
     }
 
     function addInstructionRow() {
-        let index = instructionForms.length
-        setInstructionForms(insts => ([...insts, {id: index, name: addInstructionForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
+        //let index = instructionForms.length
+        //setInstructionForms(insts => ([...insts, {id: index, name: addInstructionForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
+        const num_instructions = Object.keys(instructions).length;
+        if (instructions[(num_instructions - 1).toString()] === "") {
+            return;
+        }
+        const copy = instructions;
+        copy[num_instructions.toString()] = "";
+        setInstructions(copy);
     }
 
     function addCoreIngredientRow() {
-        let index = coreIngredientForms.length
-        setCoreIngredientForms(coreIngredients => ([...coreIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
+        // let index = coreIngredientForms.length
+        // setCoreIngredientForms(coreIngredients => ([...coreIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
+        setError(coreIngredientQuantities.at(-1))
+        if (coreIngredientQuantities.at(-1) === "") {
+            return;
+        }
+        const copy = coreIngredientQuantities;
+        copy.push("")
+        setCoreIngredientQuantities(copy);
+        //setError(JSON.stringify(coreIngredientQuantities))
     }
 
     function addSideIngredientRow() {
-        let index = sideIngredientForms.length
-        setSideIngredientForms(sideIngredients => ([...sideIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
+    //     let index = sideIngredientForms.length
+    //     setSideIngredientForms(sideIngredients => ([...sideIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
+        if (sideIngredientQuantities.at(-1) === "") {
+            return;
+        }
+        const copy = sideIngredientQuantities;
+        copy.push("")
+        setSideIngredientQuantities(copy);
     }
 
 
@@ -249,22 +270,39 @@ export default function CreateRecipeView(props) {
             const imageLink = recipeSnapshot.data()["image"];
             const recipeType = recipeSnapshot.data()["recipeType"];
             setRecipeName(name);
-            // setCoreIngredients(core);
-            // setSideIngredients(side);
+            let coreQuantities = [];
+            let coreNames = [];
+            let sideQuantities = [];
+            let sideNames = [];
+
+            core.forEach(ingredient => {
+                coreQuantities.push(ingredient.quantity);
+                coreNames.push(ingredient.name);
+            })
+
+            side.forEach(ingredient => {
+                sideQuantities.push(ingredient.quantity);
+                sideNames.push(ingredient.name);
+            })
+
+            setCoreIngredientQuantities(coreQuantities);
+            setCoreIngredientNames(coreNames);
+            setSideIngredientQuantities(sideQuantities);
+            setSideIngredientNames(sideNames);
 
             //setInstructions(steps);
             //setError(JSON.stringify(instructions))
             setError(asdf)
-            setInstructionForms([]);
-            for (let i = 0; i < Object.keys(steps).length; i++) {
-
-
-                // const copy5 = instructions;
-                // copy5[i.toString()] = steps[i.toString()];
-                // setInstructions(copy5);
-                addInstructionRow();
-                // instructionForms.push({ id: (i+1).toString(), name: addInstructionForm(i.toString()), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, i)}/> });
-            }
+            //setInstructionForms([]);
+            // for (let i = 0; i < Object.keys(steps).length; i++) {
+            //
+            //
+            //     // const copy5 = instructions;
+            //     // copy5[i.toString()] = steps[i.toString()];
+            //     // setInstructions(copy5);
+            //     addInstructionRow();
+            //     // instructionForms.push({ id: (i+1).toString(), name: addInstructionForm(i.toString()), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, i)}/> });
+            // }
 
             setTags(tag);
             setNotes(blurb);
@@ -289,6 +327,84 @@ export default function CreateRecipeView(props) {
         }
     }
 
+    function generateCoreIngredientForms() {
+        let forms = [];
+        for (let i = 0; i < Object.keys(coreIngredientQuantities).length; i++) {
+            forms.push(
+                <div>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1" style={{marginLeft: "1rem", display: "inline-block", width: "30%"}}>
+                        <Form.Control
+                            type="name"
+                            placeholder={"Instruction"}
+                            value={coreIngredientQuantities[i]}
+                            onChange={e => setField('name', e.target.value, i, 1)}
+                            style={{backgroundColor: "#ededed", borderWidth: 0}}
+                        />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1" style={{marginLeft: "1rem", display: "inline-block", width: "50%"}}>
+                        <Form.Control
+                            type="name"
+                            placeholder={"Instruction"}
+                            value={coreIngredientNames[i]}
+                            onChange={e => setField('name', e.target.value, i, 1)}
+                            style={{backgroundColor: "#ededed", borderWidth: 0}}
+                        />
+                    </Form.Group>
+                </div>)
+        }
+        return forms;
+    }
+
+    // TODO: ADD DELETE BUTTON BACK?
+
+    function generateSideIngredientForms() {
+        let forms = [];
+        for (let i = 0; i < Object.keys(sideIngredientQuantities).length; i++) {
+            forms.push(
+                <div>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1" style={{marginLeft: "1rem", display: "inline-block", width: "30%"}}>
+                        <Form.Control
+                            type="name"
+                            placeholder={"Instruction"}
+                            value={sideIngredientQuantities[i]}
+                            onChange={e => setField('name', e.target.value, i, 3)}
+                            style={{backgroundColor: "#ededed", borderWidth: 0}}
+                        />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1" style={{marginLeft: "1rem", display: "inline-block", width: "50%"}}>
+                        <Form.Control
+                            type="name"
+                            placeholder={"Instruction"}
+                            value={sideIngredientNames[i]}
+                            onChange={e => setField('name', e.target.value, i, 2)}
+                            style={{backgroundColor: "#ededed", borderWidth: 0}}
+                        />
+                    </Form.Group>
+                </div>)
+        }
+        return forms;
+    }
+
+    function generateInstructionForms() {
+        let forms = [];
+        for (let i = 0; i < Object.keys(instructions).length; i++) {
+            forms.push(
+                <div>
+                    <span style={{fontWeight: "bold"}}>{(i + 1).toString()}</span>
+                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1" style={{marginLeft: "1rem", display: "inline-block", width: "75%"}}>
+                    <Form.Control
+                        type="name"
+                        placeholder={"Instruction"}
+                        value={instructions[i.toString()]}
+                        onChange={e => setField('name', e.target.value, i, 4)}
+                        style={{backgroundColor: "#ededed", borderWidth: 0}}
+                    />
+                </Form.Group>
+                </div>)
+        }
+        return forms;
+    }
+
     useEffect(() => {
 
         if (true) {
@@ -304,63 +420,25 @@ export default function CreateRecipeView(props) {
         }
     }, []);
 
-    function addRandoForm() {
-
-        return (//show => {
-
-            <Form>
-                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    <Form.Control
-                        type="name"
-                        placeholder={"Instruction"}
-                        value={asdf}
-                        onChange={e => {setAsdf(e.target.value)}}
-                        // value={instructions[id.toString()]}
-                        // onChange={e => setField('name', e.target.value, id, 4)}
-                    />
-                </Form.Group>
-            </Form>
-        )
-        //})
-    }
-
     return (
         <div className='contentInsets' style={{paddingRight: '50%'}}>
+            <div className='leftContentInsets'>
             <div className='pageTitle'>{editState} Recipe</div>
-            <div className='pageSubtitle'>Recipe Name</div>
-            <div><Form><Form.Control size='lg' placeholder='Recipe Name' value={recipeName} onChange={e => setRecipeName(e.target.value)}/></Form></div>
+            <div className='pageSubtitle' >Recipe Name</div>
+            <div><Form><Form.Control size='lg' placeholder='Recipe Name' value={recipeName} onChange={e => setRecipeName(e.target.value)} style={{backgroundColor: "#ededed", borderWidth: 0}} /></Form></div>
             <br/>
 			<div className='pageSubtitle'>Core Ingredients</div>
-            <BootstrapTable
-                bootstrap4
-                keyField="id"
-                data={coreIngredientForms}
-                columns={ingredientColumns}
-                bordered={false}
-                containerStyle={{borderRadius: 15}}
-                headerStyle={{borderRadius: 15, backgroundClip: 'border-box'}}
-                trStyle={{borderRadius: 15}}
-                rowStyle={{backgroundColor: '#ebebeb', borderColor: 'white', borderRadius: 15}}
-                bodyStyle={{borderRadius: 15}}
-                tableStyle={{borderRadius: 15, backgroundColor: 'green'}}
-            />
-            <div>
-                <Button onClick={() => addCoreIngredientRow()}>
+            <div style={{width: "100%"}}>{generateCoreIngredientForms()}</div>
+            <div  className='leftContentInsets' style={{width: "100%"}}>
+                <Button onClick={() => addCoreIngredientRow()} >
                     Add Row
                 </Button>
             </div>
 			<br/>
 
             <div className='pageSubtitle'>Side Ingredients</div>
-            <BootstrapTable
-                bootstrap4
-                keyField="id"
-                data={sideIngredientForms}
-                columns={ingredientColumns}
-                bordered={false}
-                rowStyle={{backgroundColor: '#ebebeb', borderColor: 'white'}}
-            />
-            <div>
+            <div>{generateSideIngredientForms()}</div>
+            <div className='leftContentInsets'>
                 <Button onClick={() => addSideIngredientRow()}>
                     Add Row
                 </Button>
@@ -368,24 +446,17 @@ export default function CreateRecipeView(props) {
 			<br/>
 
             <div className='pageSubtitle'>Instructions</div>
-            <BootstrapTable
-                bootstrap4
-                keyField="id"
-                data={instructionForms}
-                columns={columns}
-                bordered={false}
-                rowStyle={{backgroundColor: '#ebebeb', borderColor: 'white'}}
-            />
-            <div ><Button onClick={() => addInstructionRow()}>
+            <div >{generateInstructionForms()}</div>
+            <div  className='leftContentInsets' style={{marginLeft: "12px"}}><Button onClick={() => addInstructionRow()}>
                 Add Step
             </Button></div>
 			<br/>
 
             <div className='pageSubtitle'>Tags</div>
-            <div><Form><Form.Control size='lg' placeholder='Enter up to 5 comma seperated tags' value={tags} onChange={e => setTags(e.target.value)}/></Form></div>
+            <div><Form><Form.Control size='lg' placeholder='Enter up to 5 comma seperated tags' value={tags} onChange={e => setTags(e.target.value)} style={{backgroundColor: "#ededed", borderWidth: 0}}/></Form></div>
 
             <div className='pageSubtitle'>Image</div>
-            <div><Form><Form.Control size='lg' placeholder='Enter image link'value={image} onChange={e => setImage(e.target.value)}/></Form></div>
+            <div><Form><Form.Control size='lg' placeholder='Enter image link'value={image} onChange={e => setImage(e.target.value)} style={{backgroundColor: "#ededed", borderWidth: 0}}/></Form></div>
 
            {/*<div>*/}
            {/*     <input type="file" name="file" onChange={changeHandler} />*/}
@@ -410,7 +481,7 @@ export default function CreateRecipeView(props) {
 
 
             <div className='pageSubtitle'>Other Information</div>
-            <div><Form><Form.Control as='textarea' placeholder='Notes' rows='4' value={notes} onChange={e => setNotes(e.target.value)}/></Form></div>
+            <div><Form><Form.Control as='textarea' placeholder='Notes' rows='4' value={notes} onChange={e => setNotes(e.target.value)} style={{backgroundColor: "#ededed", borderWidth: 0}}/></Form></div>
 
             <div style={{marginTop: "1.5rem"}}>
                 <label style={{fontSize: 22, paddingRight: '10px', verticalAlign: 'top'}}>Is Public</label>
@@ -427,6 +498,7 @@ export default function CreateRecipeView(props) {
                 <Button style={{width: "150px", marginTop: "2rem"}} onClick={() => createRecipe()}>
                     {editState}
                 </Button>
+            </div>
             </div>
 
         </div>
