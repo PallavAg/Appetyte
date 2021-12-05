@@ -7,7 +7,7 @@ import {useAuth} from "../../contexts/AuthContext";
 import {Link, useHistory, useLocation} from "react-router-dom";
 import {Button, Form} from "react-bootstrap";
 import {toast} from "react-hot-toast";
-import RecipePreviewCard from "./RecipePreviewCard";
+import CreateRecipeView from "../CreateRecipeView";
 import CommentView from "./CommentView";
 
 
@@ -20,7 +20,9 @@ export default function RecipeView(props) {
     let sharedUsername = useRef(""); // username of user you sharing the recipe with
     let [shareSuccessLabelText, setShareSuccessLabelText] = useState("");
     let [showPopup, setShowPopup] = useState(false);
+    let [showEditPopup, setShowEditPopup] = useState(false);
     let [allSharedNames, setAllSharedNames] = useState([]);
+    const [areEditing, setAreEditing] = useState(false);
 
     const [error, setError] = useState("");
 
@@ -321,6 +323,21 @@ export default function RecipeView(props) {
             <br/>
             {author === uid ? <Button variant="outline-danger" onClick={deleteRecipe}>{dltText}</Button> : <></>}
 
+            <div>
+            {author === uid ? <div>
+                <Popup trigger={<Button>Edit Recipe</Button>} open={showEditPopup} arrow={false}>
+                    <div style={{backgroundColor: "white", padding: "2rem", borderRadius: "12px",
+                        boxShadow: "0px 0px 13px #aaaaaa", align: "center", float: "center", display: "block",
+                        width: "100%", height: "100%", overflowY: "auto", position: "fixed", top: "0", left: "0"}}>
+                        <div>{React.createElement(CreateRecipeView, {id: props.id, areEditing: true})}</div>
+                        <Button onClick={e=>closeEditPopup(e)}>Done</Button>
+                       {error}
+                    </div>
+                </Popup></div> : <div/>}</div>
+
+
+
+
             <div className='card' style={{backgroundColor: '#ebebeb', borderRadius: '15px', marginTop: "1rem"}}>
                 <div style={{paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem', }} onClick={() => {}}>
                     {React.createElement(CommentView, {comments: comments, recipeId: props.id})}
@@ -329,4 +346,15 @@ export default function RecipeView(props) {
 
         </div>
     );
+
+
+    async function closeEditPopup(e) {
+        e.preventDefault();
+        setShowEditPopup(true);
+        // Ok so this shouldn't be here... but if I don't run something, then the show edit popup isn't set to false :(
+        // I assume the compiler is optimizing whatever out
+        await getDocs(query(collection(db, "Users")));
+
+        setShowEditPopup(false);
+    }
 }

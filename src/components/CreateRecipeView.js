@@ -16,14 +16,14 @@ export default function CreateRecipeView(props) {
 
     const [asdf, setAsdf] = useState("");
 
-    const [coreIngredientNames, setCoreIngredientNames] = useState({})
-    const [coreIngredientQuantities, setCoreIngredientQuantities] = useState({})
-    const [sideIngredientNames, setSideIngredientNames] = useState([])
-    const [sideIngredientQuantities, setSideIngredientQuantities] = useState([])
+    const [coreIngredientNames, setCoreIngredientNames] = useState([]);
+    const [coreIngredientQuantities, setCoreIngredientQuantities] = useState([]);
+    const [sideIngredientNames, setSideIngredientNames] = useState([]);
+    const [sideIngredientQuantities, setSideIngredientQuantities] = useState([]);
     // Todo: change this initial state!!
-    const [instructions, setInstructions] = useState({"0":"test0", "1":"test1", "2":"test2"})
-    const [image, setImage] = useState("")
-    const [editState, setEditState] = useState("Create")
+    const [instructions, setInstructions] = useState([]);
+    const [image, setImage] = useState("");
+    const [editState, setEditState] = useState("Create");
 
     // const [instructionForms, setInstructionForms] = useState(
     //     [
@@ -88,27 +88,27 @@ export default function CreateRecipeView(props) {
         //setError(value.toString() + id.toString());
         switch (whichList) {
             case 0:
-                const copy1 = coreIngredientNames;
+                const copy1 = [...coreIngredientNames];
                 copy1[id] = value;
                 setCoreIngredientNames(copy1);
                 break;
             case 1:
-                const copy2 = coreIngredientQuantities;
+                const copy2 = [...coreIngredientQuantities];
                 copy2[id] = value;
                 setCoreIngredientQuantities(copy2);
                 break;
             case 2:
-                const copy3 = sideIngredientNames;
+                const copy3 = [...sideIngredientNames];
                 copy3[id] = value;
                 setSideIngredientNames(copy3);
                 break;
             case 3:
-                const copy4 = sideIngredientQuantities;
+                const copy4 = [...sideIngredientQuantities];
                 copy4[id] = value;
                 setSideIngredientQuantities(copy4);
                 break;
             case 4:
-                const copy5 = instructions;
+                const copy5 = [...instructions];
                 copy5[id] = value;
                 setInstructions(copy5);
                 break;
@@ -211,7 +211,7 @@ export default function CreateRecipeView(props) {
         if (instructions[(num_instructions - 1).toString()] === "") {
             return;
         }
-        const copy = instructions;
+        const copy = [...instructions];
         copy[num_instructions.toString()] = "";
         setInstructions(copy);
     }
@@ -219,11 +219,12 @@ export default function CreateRecipeView(props) {
     function addCoreIngredientRow() {
         // let index = coreIngredientForms.length
         // setCoreIngredientForms(coreIngredients => ([...coreIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
-        setError(coreIngredientQuantities.at(-1))
-        if (coreIngredientQuantities.at(-1) === "") {
+        //setError(coreIngredientQuantities.at(-1))
+        if (coreIngredientQuantities.size > 0 && coreIngredientQuantities.at(-1) === "") {
             return;
         }
-        const copy = coreIngredientQuantities;
+
+        const copy = [...coreIngredientQuantities];
         copy.push("")
         setCoreIngredientQuantities(copy);
         //setError(JSON.stringify(coreIngredientQuantities))
@@ -232,10 +233,10 @@ export default function CreateRecipeView(props) {
     function addSideIngredientRow() {
     //     let index = sideIngredientForms.length
     //     setSideIngredientForms(sideIngredients => ([...sideIngredients, {quantity: addCoreIngredientQuantityForm(index), name: addCoreIngredientNameForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
-        if (sideIngredientQuantities.at(-1) === "") {
+        if (sideIngredientQuantities.size > 0 && sideIngredientQuantities.at(-1) === "") {
             return;
         }
-        const copy = sideIngredientQuantities;
+        const copy = [...sideIngredientQuantities];
         copy.push("")
         setSideIngredientQuantities(copy);
     }
@@ -256,8 +257,7 @@ export default function CreateRecipeView(props) {
     const [error, setError] = useState("");
 
     async function fillInformation() {
-        const recipeId =
-            "DDLJ8Y7YN5wfv7UG0x2F";//props.id;
+        const recipeId = props.id;
         let recipeSnapshot;
         recipeSnapshot = await getDoc(doc(db, "Recipes", recipeId));
         if (recipeSnapshot.exists) {
@@ -289,8 +289,7 @@ export default function CreateRecipeView(props) {
             setCoreIngredientNames(coreNames);
             setSideIngredientQuantities(sideQuantities);
             setSideIngredientNames(sideNames);
-
-            //setInstructions(steps);
+            setInstructions(steps);
             //setError(JSON.stringify(instructions))
             setError(asdf)
             //setInstructionForms([]);
@@ -304,7 +303,14 @@ export default function CreateRecipeView(props) {
             //     // instructionForms.push({ id: (i+1).toString(), name: addInstructionForm(i.toString()), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, i)}/> });
             // }
 
-            setTags(tag);
+            let tagString = ""
+            tag.forEach(t => {
+              tagString += t + " "
+            })
+            if (tagString.length > 1) {
+                tagString.substring(0, tagString.length - 1); // Drop the extra " " at the end
+            }
+            setTags(tagString);
             setNotes(blurb);
             setImage(imageLink);
 
@@ -313,14 +319,7 @@ export default function CreateRecipeView(props) {
             } else {
                 setSwitchValue(false);
             }
-            // setAuthor(author);
-            // setName((await getDoc(doc(db, "Users", author))).data().username);
-            // if (sharedUsers) {
-            //     setAllSharedNames(sharedUsers);
-            // }
-            // if (comment) {
-            //     setComments(comment)
-            // }
+
         } else {
             // doc.data() will be undefined in this case
             console.log("No such document!");
@@ -346,7 +345,7 @@ export default function CreateRecipeView(props) {
                             type="name"
                             placeholder={"Instruction"}
                             value={coreIngredientNames[i]}
-                            onChange={e => setField('name', e.target.value, i, 1)}
+                            onChange={e => setField('name', e.target.value, i, 0)}
                             style={{backgroundColor: "#ededed", borderWidth: 0}}
                         />
                     </Form.Group>
@@ -407,9 +406,7 @@ export default function CreateRecipeView(props) {
 
     useEffect(() => {
 
-        if (true) {
-            // TODO: Restore the original if statement!
-        //if (props.areEditing) {
+        if (props.areEditing) {
             fillInformation();
 
             // Update button text
@@ -592,16 +589,29 @@ export default function CreateRecipeView(props) {
             blurb: notes,
         }
 
-        // Add recipe to database
-        let recipeRef = collection(db, "Recipes");
-        const docRef = await addDoc(recipeRef, recipe)
 
-        toast.success("Recipe created!")
-        setError(docRef.id);
+        if (props.areEditing) {
+            // Editing a recipe
+            let recipeRef = doc(db, "Recipes", props.id);
+            const docRef = await updateDoc(recipeRef, recipe);
+            toast.success("Recipe updated!");
+            //setError(docRef.id);
 
-        // Add recipe id under list of user's created recipes
-        let userCreatedRecipesRef = doc(db, "Users", uid);
-        await updateDoc(userCreatedRecipesRef, { createdRecipes: arrayUnion(docRef.id) });
+        } else {
+            // Creating a recipe
+
+            // Add recipe to database
+            let recipeRef = collection(db, "Recipes");
+            const docRef = await addDoc(recipeRef, recipe);
+
+            toast.success("Recipe created!");
+            setError(docRef.id);
+
+            // Add recipe id under list of user's created recipes
+            let userCreatedRecipesRef = doc(db, "Users", uid);
+            await updateDoc(userCreatedRecipesRef, { createdRecipes: arrayUnion(docRef.id) });
+        }
+
 
 
     }
