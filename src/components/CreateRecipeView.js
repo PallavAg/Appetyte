@@ -410,6 +410,7 @@ export default function CreateRecipeView() {
             author: uid,
             upvotedList: [],
             downvotedList: [],
+            madeList: [],
             recipeType: switchValue ? "Public" : "Private",
             tags: tags.split(',').map(tag => tag.trim()),
             image: image,

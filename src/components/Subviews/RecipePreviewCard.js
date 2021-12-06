@@ -19,6 +19,7 @@ export default function RecipePreviewCard(props) {
     const [upvoted, setUpvoted] = useState(false)
     const [downvoted, setDownvoted] = useState(false)
     const [voteCount, setVoteCount] = useState(0)
+    const [madeCount, setMadeCount] = useState(props.recipe.madeList.length)
 
     const [hideElementsOnCookbook, setHideElementsOnCookbook] = useState(props.interactiveElement)
     const viewingSavedView = (props.savedView === 1)
@@ -115,6 +116,13 @@ export default function RecipePreviewCard(props) {
         })
     }
 
+   /* function getMadeCount() {
+        recipeRef.get().then((doc) => {
+            if (doc.exists && doc.data().madeList?.exists) setSaved(doc.data().madeList.length)
+            else setMadeCount(0)
+        })
+    }*/
+
     return (
 
         <div id={props.id} className='smallCard'>
@@ -124,6 +132,9 @@ export default function RecipePreviewCard(props) {
                         <div style={{display: 'flex'}}>
                             <div className='pageSubtitle' onClick={() => {props.viewingState(true)}}><u style={{ textDecorationColor: 'blue'}}>{recipeName}</u></div>
                             <Button style={{boxShadow: 'none', margin: '0.5rem', display: viewingSavedView ? 'block' : hideElementsOnCookbook}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
+                            <div style={{paddingTop: '1rem', display: hideElementsOnCookbook}}>
+                                <div className='pageSubSubtitle'>{madeCount} People Made This</div>
+                            </div>
                         </div>
 
                         <div>

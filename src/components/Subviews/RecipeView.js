@@ -21,6 +21,8 @@ export default function RecipeView(props) {
     let [shareSuccessLabelText, setShareSuccessLabelText] = useState("");
     let [showPopup, setShowPopup] = useState(false);
     let [allSharedNames, setAllSharedNames] = useState([]);
+    const [made, setMade] = useState(false)
+    const [madeList, setMadeList] = useState([])
 
     const [error, setError] = useState("");
 
@@ -191,6 +193,15 @@ export default function RecipeView(props) {
         }
     }
 
+    async function performMade() {
+        setMade(!made)
+        if (made) {
+            await updateDoc(doc(db, "Recipes", props.id), { madeList: arrayUnion(uid) });
+        } else {
+            await updateDoc(doc(db, "Recipes", props.id), { madeList: arrayRemove(uid) });
+        }
+    }
+
     async function deleteRecipe() {
         if (dltText === "Delete Recipe") {
             setDltText("Are you sure? Click again to delete.")
@@ -259,6 +270,12 @@ export default function RecipeView(props) {
 
                 <div className='pageTitle'>
                     {recipeName}
+                    <div style={{align: "right", float: "right", display: "inline", color: "red"}}>
+                        <Button style={{boxShadow: 'none', margin: '0.5rem'}}
+                                variant={made ? "dark" : "outline-dark"}
+                                onClick={performMade}><b>{made ? "I Made This" : "I Made This"}</b>
+                        </Button>
+                    </div>
                     {author === uid ? <div style={{align: "right", float: "right", display: "inline"}}>
                         <Popup trigger={<Button>Share</Button>} position=" center" open={showPopup} arrow={false}>
                         <div style={{backgroundColor: "white", padding: "2rem", borderRadius: "12px",
