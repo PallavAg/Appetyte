@@ -13,7 +13,7 @@ const SearchType = {
     INGREDIENTS_IN_MY_PANTRY: 0,
     INGREDIENTS: 1,
     NAME: 2,
-
+    TAG: 3
 }
 
 export default function SearchPage() {
@@ -241,6 +241,28 @@ export default function SearchPage() {
             });
 
         }
+        else if (segmentedCtrlState == SearchType.TAG || !uid) {
+            // Searching by tag
+
+            const searchTags = searchQuery.current.value.toLowerCase().split(" ").filter(name =>
+                // Filter out useless words
+                (name !== "" && name !== "in" && name !== "a" && name !== "the" && name !== "and")
+            )
+
+            querySnapshot.forEach((doc) => {
+                let name = doc.data()["name"];
+                let tags = doc.data()["tags"];
+                let coreIngredients = doc.data()["tags"];
+                const filteredArray = tags.filter(value => searchTags.includes(value.toLowerCase()));
+
+                if (filteredArray.length > 0) {
+                    tempRecipes.push({name: name, coreIngredients: coreIngredients, id: doc.id, data: doc.data()});
+                }
+            });
+
+
+
+        }
 
         if (showRecipesOnlyInCookBook && uid) {
             // Take out recipes that are not part of their cookbook
@@ -340,6 +362,11 @@ export default function SearchPage() {
             setHideNotListedIngredients('none');
             setHideSearchBar('block');
         }
+        else if (newValue == SearchType.TAG) {
+            setHideNotInPantry('block');
+            setHideNotListedIngredients('none');
+            setHideSearchBar('block');
+        }
         setSegmentedCtrlState(newValue)
     }
 
@@ -365,6 +392,7 @@ export default function SearchPage() {
                                             { label: "Ingredients in My Pantry", value: 0},
                                             { label: "Any Ingredients", value: 1, default: true },
                                             { label: "Name", value: 2},
+                                            { label: "Tag", value : 3}
                                         ]}
 
                                         setValue={newValue => changeSegmentedControl(newValue)}
@@ -379,7 +407,8 @@ export default function SearchPage() {
                             <Form.Group className="mb-3" controlId="search" >
                                 <Form.Control
                                     type="name"
-                                    placeholder={segmentedCtrlState === SearchType.INGREDIENTS ? "Enter Ingredients" : "Enter Recipe Name"}
+                                    placeholder={segmentedCtrlState === SearchType.INGREDIENTS ? "Enter Ingredients" :
+                                        (segmentedCtrlState === SearchType.TAG ? "Enter Tag Name" : "Enter Recipe Name")}
                                     style={{display: hideSearchBar, marginBottom: "0.5rem"}}
                                     ref={searchQuery}
                                 />
