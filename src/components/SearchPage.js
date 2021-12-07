@@ -252,7 +252,7 @@ export default function SearchPage() {
             querySnapshot.forEach((doc) => {
                 let name = doc.data()["name"];
                 let tags = doc.data()["tags"];
-                let coreIngredients = doc.data()["tags"];
+                let coreIngredients = doc.data()["coreIngredients"];
                 const filteredArray = tags.filter(value => searchTags.includes(value.toLowerCase()));
 
                 if (filteredArray.length > 0) {
