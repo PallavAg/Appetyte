@@ -4,11 +4,14 @@ import Switch from "react-switch";
 import BootstrapTable from "react-bootstrap-table-next";
 import firebase, {db} from "../firebase";
 import {BsFillTrashFill} from "react-icons/bs";
-import {doc, collection, addDoc, setDoc, updateDoc, arrayUnion, getDoc} from "firebase/firestore";
+import {doc, collection, addDoc, setDoc, updateDoc, arrayUnion, getDoc, getDocs, query} from "firebase/firestore";
 import {useAuth} from "../contexts/AuthContext";
 import RecipePreviewCard from "./Subviews/RecipePreviewCard";
 import {toast} from "react-hot-toast";
 import {jsonToCSV} from "react-papaparse";
+import RecipeView from "./Subviews/RecipeView";
+import Popup from "reactjs-popup";
+import RecipePreview from "./RecipePreview";
 
 export default function CreateRecipeView(props) {
 
@@ -16,10 +19,14 @@ export default function CreateRecipeView(props) {
 
     const [asdf, setAsdf] = useState("");
 
+    let [showPreviewPopup, setShowPreviewPopup] = useState(false);
+
     const [coreIngredientNames, setCoreIngredientNames] = useState([]);
     const [coreIngredientQuantities, setCoreIngredientQuantities] = useState([]);
+    const [coreIngredients, setCoreIngredients] = useState([]);
     const [sideIngredientNames, setSideIngredientNames] = useState([]);
     const [sideIngredientQuantities, setSideIngredientQuantities] = useState([]);
+    const [sideIngredients, setSideIngredients] = useState([]);
     // Todo: change this initial state!!
     const [instructions, setInstructions] = useState([]);
     const [image, setImage] = useState("");
@@ -364,7 +371,7 @@ export default function CreateRecipeView(props) {
                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1" style={{marginLeft: "1rem", display: "inline-block", width: "30%"}}>
                         <Form.Control
                             type="name"
-                            placeholder={"Instruction"}
+                            placeholder={"Quantity"}
                             value={sideIngredientQuantities[i]}
                             onChange={e => setField('name', e.target.value, i, 3)}
                             style={{backgroundColor: "#ededed", borderWidth: 0}}
@@ -373,7 +380,7 @@ export default function CreateRecipeView(props) {
                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1" style={{marginLeft: "1rem", display: "inline-block", width: "50%"}}>
                         <Form.Control
                             type="name"
-                            placeholder={"Instruction"}
+                            placeholder={"Ingredient"}
                             value={sideIngredientNames[i]}
                             onChange={e => setField('name', e.target.value, i, 2)}
                             style={{backgroundColor: "#ededed", borderWidth: 0}}
@@ -402,6 +409,37 @@ export default function CreateRecipeView(props) {
                 </div>)
         }
         return forms;
+    }
+
+    function setIngredients() {
+        let core = []
+        for (let i = 0; i < Object.keys(coreIngredientNames).length; i++) {
+            const bothEmpty = (coreIngredientNames["i"] === "" && coreIngredientQuantities["i"] === ""); // To compensate for lack of delete button
+            if (!bothEmpty) {
+                if (!(i in coreIngredientNames) || (coreIngredientNames[i] === "") || !(i in coreIngredientQuantities) || (coreIngredientQuantities[i] === "")) {
+                    setError("Please make sure all core ingredients have both an ingredient and a quantity.");
+                    return;
+                }
+                let ingredient = {name: coreIngredientNames[i], quantity: coreIngredientQuantities[i]};
+                core.push(ingredient);
+            }
+        }
+
+        // Save recipe side ingredients
+        let side = []
+        for (let i = 0; i < Object.keys(sideIngredientNames).length; i++) {
+            const bothEmpty = (sideIngredientNames["i"] === "" && sideIngredientQuantities["i"] === ""); // To compensate for lack of delete button
+            if (!bothEmpty) {
+                if (!(i in sideIngredientNames) || !(i in sideIngredientQuantities)) {
+                    setError("Please make sure all side ingredients have both an ingredient and a quantity.")
+                    return;
+                }
+                let ingredient = {name: sideIngredientNames[i], quantity: sideIngredientQuantities[i]};
+                side.push(ingredient);
+            }
+        }
+        setCoreIngredients(core)
+        setSideIngredients(side)
     }
 
     useEffect(() => {
@@ -495,6 +533,16 @@ export default function CreateRecipeView(props) {
                 <Button style={{width: "150px", marginTop: "2rem"}} onClick={() => createRecipe()}>
                     {editState}
                 </Button>
+                <div>
+                    <Popup trigger={<Button style={{width: "150px", marginTop: "0.5rem"}} onClick={setIngredients}>Preview</Button>} open = {showPreviewPopup} arrow={true}>
+                        <div style={{backgroundColor: "white", padding: "2rem", borderRadius: "12px",
+                            boxShadow: "0px 0px 13px #aaaaaa", align: "center", float: "center", display: "block",
+                            width: "100%", height: "100%", overflowY: "auto", position: "fixed", top: "0", left: "0"}}>
+                            <div>{React.createElement(RecipePreview,
+                                {id: props.id, coreIngredients: coreIngredients, sideIngredients: sideIngredients, instructions: instructions, tags: tags.split(',').map(tag => tag.trim()), blurb: notes, author: uid, image: image})}</div>
+                            <Button onClick={e=>closePreviewPopup(e)}>Back</Button>
+                        </div>
+                    </Popup></div>
             </div>
             </div>
 
@@ -505,6 +553,16 @@ export default function CreateRecipeView(props) {
         const empty = (field.toString().trim().length === 0)
         if (empty) setError(type + " is empty! Set one to create a recipe.")
         return empty
+    }
+
+    async function closePreviewPopup(e) {
+        e.preventDefault();
+        setShowPreviewPopup(true);
+        // Ok so this shouldn't be here... but if I don't run something, then the show edit popup isn't set to false :(
+        // I assume the compiler is optimizing whatever out
+        await getDocs(query(collection(db, "Users")));
+
+        setShowPreviewPopup(false);
     }
 
     async function createRecipe() {
