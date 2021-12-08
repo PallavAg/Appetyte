@@ -14,9 +14,11 @@ import {Link} from "react-router-dom";
 export default function MyPantryView() {
     const {uid} = useAuth();
     const [error, setError] = useState("");
-    const [futureIngredient, setFutureIngredient] = useState({name: "", expiration: ""});
+    const [filterCategory, setFilterCategory] = useState("");
+    const [futureIngredient, setFutureIngredient] = useState({name: "", expiration: "", category: ""});
     const [ingredientNames, setIngredientNames] = useState([]);
     const [ingredientExpirations, setIngredientExpirations] = useState([]);
+    const [ingredientCategories, setIngredientCategories] = useState([]);
     const [checked, setChecked] = useState([]);
     const [selectedIngredients, setSelectedIngredients] = useState([]);
 
@@ -30,6 +32,8 @@ export default function MyPantryView() {
             copyIngredient.name = value;
         } else if (field === "expiration") {
             copyIngredient.expiration = value;
+        } else if (field === "category") {
+            copyIngredient.category = value;
         }
         setFutureIngredient(copyIngredient);
     }
@@ -39,18 +43,17 @@ export default function MyPantryView() {
             setError("You must be logged in to set and see your ingredients!");
             return;
         }
-        db.collection("Users").doc(uid).collection("Pantry").get().then(ingredients => updateIngredients(ingredients.docs), e => setError(e.message));
-        try {
-            let userId = auth.tenantId;
 
-        } catch (err) {
-            setError(err.message);
-            console.log(err.message);
+        // Query only those with the specified category
+        if (filterCategory.length > 0) {
+            db.collection("Users").doc(uid).collection("Pantry").where("category","==",filterCategory).get().then(ingredients => updateIngredients(ingredients.docs), e => setError(e.message));
+        } else {
+            db.collection("Users").doc(uid).collection("Pantry").get().then(ingredients => updateIngredients(ingredients.docs), e => setError(e.message));
         }
     }
 
 
-    function addIngredient(e, name, expiration) {
+    function addIngredient(e, name, expiration, category) {
         e.preventDefault();
 
         if (uid === null) {
@@ -70,18 +73,23 @@ export default function MyPantryView() {
 
         // DB code
         let docData = {name: name, expiration: expiration};
+        if (category.length > 0) {
+            docData.category = category;
+        }
         db.collection("Users").doc(uid).collection("Pantry").add(docData).then(getIngredients, e => setError(e.message));
     }
 
     function updateIngredients(ingredients) {
         let newIngredients = [];
         let newExpirations = [];
+        let newCategories = [];
         ingredients.forEach( (ingredient, index) => {
                 newIngredients.push(
                     {
                         id: index,
                         name: ingredient.data().name,
                         expiration: ingredient.data().expiration,
+                        category: (ingredient.data().category && ingredient.data().category.length > 0) ? ingredient.data().category : "-",
                         delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, ingredient.id)}/>,
                         select: <input
                             type="checkbox"
@@ -95,6 +103,7 @@ export default function MyPantryView() {
         );
         setIngredientNames(newIngredients);
         setIngredientExpirations(newExpirations);
+        setIngredientCategories(newCategories);
     }
 
     function deleteIngredient(e, id) {
@@ -120,6 +129,10 @@ export default function MyPantryView() {
             dataField: "expiration",
             text: "Expires in",
             sort: true
+        },
+        {
+            dataField: "category",
+            text: "Category"
         },
         {
             dataField: "delete",
@@ -169,15 +182,40 @@ export default function MyPantryView() {
                                         onChange={e => setField('name', e.target.value)}
                                     />
                                 </Col>
-                                <Col sm={5}>
+                                <Col sm={3}>
                                     <Form.Control
                                         type="expiration"
                                         placeholder={"Expiration"}
                                         onChange={e => setField('expiration', e.target.value)}
                                     />
                                 </Col>
+                                <Col sm={3}>
+                                    <Form.Control
+                                        type="category"
+                                        placeholder={"Category"}
+                                        onChange={e => setField('category', e.target.value)}
+                                    />
+                                </Col>
                                 <Col>
-                                    <button onClick={(event) => addIngredient(event, futureIngredient.name, futureIngredient.expiration)}>+</button>
+                                    <Button onClick={(event) => addIngredient(event, futureIngredient.name, futureIngredient.expiration, futureIngredient.category)}>+</Button>
+                                </Col>
+                            </Row>
+                        </Form.Group>
+                    </Form>
+                </div>
+                <div style={{paddingBottom: "15px"}}>
+                    <Form>
+                        <Form.Group>
+                            <Row>
+                                <Col sm={6}>
+                                    <Form.Control
+                                        type="category"
+                                        placeholder={"Filter by Category..."}
+                                        onChange={e => setFilterCategory(e.target.value)}
+                                    />
+                                </Col>
+                                <Col>
+                                    <Button onClick={(event) => getIngredients()}>Filter Ingredients</Button>
                                 </Col>
                             </Row>
                         </Form.Group>
