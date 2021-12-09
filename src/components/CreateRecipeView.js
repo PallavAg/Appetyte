@@ -341,7 +341,7 @@ export default function CreateRecipeView(props) {
                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1" style={{marginLeft: "1rem", display: "inline-block", width: "30%"}}>
                         <Form.Control
                             type="name"
-                            placeholder={"Instruction"}
+                            placeholder={"Quantity"}
                             value={coreIngredientQuantities[i]}
                             onChange={e => setField('name', e.target.value, i, 1)}
                             style={{backgroundColor: "#ededed", borderWidth: 0}}
@@ -350,7 +350,7 @@ export default function CreateRecipeView(props) {
                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1" style={{marginLeft: "1rem", display: "inline-block", width: "50%"}}>
                         <Form.Control
                             type="name"
-                            placeholder={"Instruction"}
+                            placeholder={"Ingredient"}
                             value={coreIngredientNames[i]}
                             onChange={e => setField('name', e.target.value, i, 0)}
                             style={{backgroundColor: "#ededed", borderWidth: 0}}
@@ -652,6 +652,7 @@ export default function CreateRecipeView(props) {
         if (props.areEditing) {
             // Editing a recipe
             let recipeRef = doc(db, "Recipes", props.id);
+            console.log(recipe);
             const docRef = await updateDoc(recipeRef, recipe);
             toast.success("Recipe updated!");
             //setError(docRef.id);
