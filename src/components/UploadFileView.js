@@ -30,7 +30,7 @@ export default function UploadFileView() {
 	};
 
 	function checkIfValidCSV(file) {
-		if (!file.type.toString().includes("csv")) {
+		if (!(file.type.toString().includes("csv") || file.type.toString().includes("application/vnd.ms-excel"))) {
 			setError("Oops! '" + file.name + "' is not a CSV file. Please upload a CSV.")
 			setIsFilePicked(false)
 		}
@@ -62,8 +62,10 @@ export default function UploadFileView() {
 		let text = (results.data.length - 1) + " Recipes successfully created!"
 
 		// Check CSV Correctness
-		for (let i in results.data) {
+		//for (let i in results.data) {
+		for (let i = 0; i < results.data.length; i++) {
 			if (results.data[i].length !== 8) {
+				console.log(results.data[i]);
 				error = true
 				text = "Oops! Please ensure CSV has all 8 headers, even if they are empty."
 				break
@@ -113,6 +115,7 @@ export default function UploadFileView() {
 				tags: r[4].split(','),
 				image: r[5],
 				blurb: r[6],
+				madeList: []
 			}
 
 			// Add recipe to database
