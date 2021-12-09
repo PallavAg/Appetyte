@@ -408,7 +408,7 @@ export default function SearchPage() {
                                 <Form.Control
                                     type="name"
                                     placeholder={(uid) ? (segmentedCtrlState === SearchType.INGREDIENTS ? "Enter Ingredients" :
-                                        (segmentedCtrlState === SearchType.TAG ? "Enter Tag Name" : "Enter Recipe Name")) : "Enter Recipe Name"}
+                                        (segmentedCtrlState === SearchType.TAG ? "List Tags, Separated by Spaces" : "Enter Recipe Name")) : "Enter Recipe Name"}
                                     style={{display: hideSearchBar, marginBottom: "0.5rem"}}
                                     ref={searchQuery}
                                 />
