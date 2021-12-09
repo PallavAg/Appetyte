@@ -133,7 +133,10 @@ export default function RecipePreviewCard(props) {
                             <div className='pageSubtitle' onClick={() => {props.viewingState(true)}}><u style={{ textDecorationColor: 'blue'}}>{recipeName}</u></div>
                             <Button style={{boxShadow: 'none', margin: '0.5rem', display: viewingSavedView ? 'block' : hideElementsOnCookbook}} variant={saved ? "warning" : "outline-warning"} onClick={performSave}><b>{saved ? "Saved" : "Save"}</b></Button>
                             <div style={{paddingTop: '1rem', display: hideElementsOnCookbook}}>
-                                <div className='pageSubSubtitle'>{madeCount} People Made This</div>
+                                {
+                                    madeCount !== 0 ? <div className='pageSubSubtitle'>{madeCount === 1 ? `1 Person Made This` : `${madeCount} People Made This`}</div> : <div className='pageSubSubtitle'>No one has made this</div>
+                                }
+
                             </div>
                         </div>
 

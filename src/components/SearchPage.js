@@ -396,7 +396,7 @@ export default function SearchPage() {
                                         ]}
 
                                         setValue={newValue => changeSegmentedControl(newValue)}
-                                        style={{ width: 600, display: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '20px', fontSize: 15}} // purple400
+                                        style={{ width: 800, display: segmentedControlHeight, color: 'grey', backgroundColor: 'white', borderColor: 'white', borderWidth: 4, borderRadius: '20px', fontSize: 15}} // purple400
                                     />
                                 </Col>
                                 <Col>
