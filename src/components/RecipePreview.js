@@ -38,8 +38,10 @@ export default function RecipePreview(props) {
         //  recipeSnapshot = await getDoc(doc(db, "Users", "8O4wmwxgsbXcr112yd48xe2OHVb2", recipeCollection, recipeId));
         //} else {
         //}
-            const core = props.coreIngredients;
-            const side = props.sideIngredients;
+            const coreIngredientNames = props.coreIngredientsNames;
+            const sideIngredientNames = props.sideIngredientsNames;
+            const coreIngredientQuantities = props.coreIngredientsQuantities;
+            const sideIngredientQuantities = props.sideIngredientsQuantities;
             const steps = props.instructions;
             const tag = props.tags;
             const blurb = props.blurb;
@@ -47,14 +49,41 @@ export default function RecipePreview(props) {
             const author = props.author;
             const imageLink = props.image;
             setRecipeName(name);
-            setCoreIngredients(core);
-            setSideIngredients(side);
             setInstructions(steps);
             setTags(tag);
             setNotes(blurb);
             setImage(imageLink);
             setAuthor(author);
             setName((await getDoc(doc(db, "Users", author))).data().username);
+
+        let core = []
+        for (let i = 0; i < Object.keys(coreIngredientNames).length; i++) {
+            const bothEmpty = (coreIngredientNames["i"] === "" && coreIngredientQuantities["i"] === ""); // To compensate for lack of delete button
+            if (!bothEmpty) {
+                if (!(i in coreIngredientNames) || (coreIngredientNames[i] === "") || !(i in coreIngredientQuantities) || (coreIngredientQuantities[i] === "")) {
+                    setError("Please make sure all core ingredients have both an ingredient and a quantity.");
+                    return;
+                }
+                let ingredient = {name: coreIngredientNames[i], quantity: coreIngredientQuantities[i]};
+                core.push(ingredient);
+            }
+        }
+
+        // Save recipe side ingredients
+        let side = []
+        for (let i = 0; i < Object.keys(sideIngredientNames).length; i++) {
+            const bothEmpty = (sideIngredientNames["i"] === "" && sideIngredientQuantities["i"] === ""); // To compensate for lack of delete button
+            if (!bothEmpty) {
+                if (!(i in sideIngredientNames) || !(i in sideIngredientQuantities)) {
+                    setError("Please make sure all side ingredients have both an ingredient and a quantity.")
+                    return;
+                }
+                let ingredient = {name: sideIngredientNames[i], quantity: sideIngredientQuantities[i]};
+                side.push(ingredient);
+            }
+        }
+        setCoreIngredients(core)
+        setSideIngredients(side)
     }
 
     useEffect(()=>{

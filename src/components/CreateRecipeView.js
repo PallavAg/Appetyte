@@ -411,37 +411,6 @@ export default function CreateRecipeView(props) {
         return forms;
     }
 
-    function setIngredients() {
-        let core = []
-        for (let i = 0; i < Object.keys(coreIngredientNames).length; i++) {
-            const bothEmpty = (coreIngredientNames["i"] === "" && coreIngredientQuantities["i"] === ""); // To compensate for lack of delete button
-            if (!bothEmpty) {
-                if (!(i in coreIngredientNames) || (coreIngredientNames[i] === "") || !(i in coreIngredientQuantities) || (coreIngredientQuantities[i] === "")) {
-                    setError("Please make sure all core ingredients have both an ingredient and a quantity.");
-                    return;
-                }
-                let ingredient = {name: coreIngredientNames[i], quantity: coreIngredientQuantities[i]};
-                core.push(ingredient);
-            }
-        }
-
-        // Save recipe side ingredients
-        let side = []
-        for (let i = 0; i < Object.keys(sideIngredientNames).length; i++) {
-            const bothEmpty = (sideIngredientNames["i"] === "" && sideIngredientQuantities["i"] === ""); // To compensate for lack of delete button
-            if (!bothEmpty) {
-                if (!(i in sideIngredientNames) || !(i in sideIngredientQuantities)) {
-                    setError("Please make sure all side ingredients have both an ingredient and a quantity.")
-                    return;
-                }
-                let ingredient = {name: sideIngredientNames[i], quantity: sideIngredientQuantities[i]};
-                side.push(ingredient);
-            }
-        }
-        setCoreIngredients(core)
-        setSideIngredients(side)
-    }
-
     useEffect(() => {
 
         if (props.areEditing) {
@@ -534,12 +503,15 @@ export default function CreateRecipeView(props) {
                     {editState}
                 </Button>
                 <div>
-                    <Popup trigger={<Button style={{width: "150px", marginTop: "0.5rem"}} onClick={setIngredients}>Preview</Button>} open = {showPreviewPopup} arrow={true}>
+                    <Popup trigger={<Button style={{width: "150px", marginTop: "0.5rem"}} >Preview</Button>} open = {showPreviewPopup} arrow={true}>
                         <div style={{backgroundColor: "white", padding: "2rem", borderRadius: "12px",
                             boxShadow: "0px 0px 13px #aaaaaa", align: "center", float: "center", display: "block",
                             width: "100%", height: "100%", overflowY: "auto", position: "fixed", top: "0", left: "0"}}>
                             <div>{React.createElement(RecipePreview,
-                                {id: props.id, coreIngredients: coreIngredients, sideIngredients: sideIngredients, instructions: instructions, tags: tags.split(',').map(tag => tag.trim()), blurb: notes, author: uid, image: image})}</div>
+                                {id: props.id, coreIngredientsNames: coreIngredientNames, sideIngredientsNames: sideIngredientNames,
+                                    coreIngredientsQuantities: coreIngredientQuantities, sideIngredientsQuantities: sideIngredientQuantities,
+                                    instructions: instructions, tags: tags.split(',').map(tag => tag.trim()), blurb: notes,
+                                    author: uid, image: image})}</div>
                             <Button onClick={e=>closePreviewPopup(e)}>Back</Button>
                         </div>
                     </Popup></div>
