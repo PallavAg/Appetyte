@@ -27,7 +27,6 @@ export default function CreateRecipeView(props) {
     const [sideIngredientNames, setSideIngredientNames] = useState([]);
     const [sideIngredientQuantities, setSideIngredientQuantities] = useState([]);
     const [sideIngredients, setSideIngredients] = useState([]);
-    // Todo: change this initial state!!
     const [instructions, setInstructions] = useState([]);
     const [image, setImage] = useState("");
     const [editState, setEditState] = useState("Create");
@@ -215,11 +214,11 @@ export default function CreateRecipeView(props) {
         //let index = instructionForms.length
         //setInstructionForms(insts => ([...insts, {id: index, name: addInstructionForm(index), delete: <BsFillTrashFill onClick={(event) => deleteIngredient(event, index)}/> }]));
         const num_instructions = Object.keys(instructions).length;
-        if (instructions[(num_instructions - 1).toString()] === "") {
+        if (instructions[(num_instructions - 1)] === "") {
             return;
         }
         const copy = [...instructions];
-        copy[num_instructions.toString()] = "";
+        copy[num_instructions] = "";
         setInstructions(copy);
     }
 
@@ -605,11 +604,17 @@ export default function CreateRecipeView(props) {
             }
         }
 
+        // Remove empty instruction rows
+        const tempInstructions = instructions.filter(val => (val != ""));
+        setInstructions(tempInstructions); // For some reason I can't directly use setInstructions(instructions.filter())
+                                           // or else the recipe object will not use the new state value. I have to create
+                                           //  this intermediate tempInstructions instead
+
         const recipe = {
             name: recipeName,
             coreIngredients: coreIngredients,
             sideIngredients: sideIngredients,
-            instructions: instructions,
+            instructions: tempInstructions,
             author: uid,
             upvotedList: [],
             downvotedList: [],
