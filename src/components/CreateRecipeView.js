@@ -652,7 +652,6 @@ export default function CreateRecipeView(props) {
         if (props.areEditing) {
             // Editing a recipe
             let recipeRef = doc(db, "Recipes", props.id);
-            console.log(recipe);
             const docRef = await updateDoc(recipeRef, recipe);
             toast.success("Recipe updated!");
             //setError(docRef.id);
