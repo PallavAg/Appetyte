@@ -63,8 +63,8 @@ export default function CommentView(props) {
     return (
        <div>
            <div className="pageSubtitle" style={{paddingTop: "0rem"}} >Comments</div>
-           <Button style={{float: "right"}} onClick={e => addComment(e)}>Add Comment</Button>
-           <Form style={{maxWidth: "80%"}}>
+           <Button style={{float: "right",  maxWidth: "25%"}} onClick={e => addComment(e)}>Add Comment</Button>
+           <Form style={{maxWidth: "75%"}}>
                <Form.Group className="mb-3" controlId="addComment" >
                    <Form.Control
                        type="name"
