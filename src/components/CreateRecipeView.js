@@ -312,10 +312,10 @@ export default function CreateRecipeView(props) {
 
             let tagString = ""
             tag.forEach(t => {
-              tagString += t + " "
+              tagString += t + ", "
             })
-            if (tagString.length > 1) {
-                tagString.substring(0, tagString.length - 1); // Drop the extra " " at the end
+            if (tagString.length > 2) {
+                tagString = tagString.substring(0, tagString.length - 2); // Drop the extra ", " at the end
             }
             setTags(tagString);
             setNotes(blurb);
