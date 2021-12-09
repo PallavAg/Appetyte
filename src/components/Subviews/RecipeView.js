@@ -22,8 +22,6 @@ export default function RecipeView(props) {
     let [showPopup, setShowPopup] = useState(false);
     let [showEditPopup, setShowEditPopup] = useState(false);
     let [allSharedNames, setAllSharedNames] = useState([]);
-    const [made, setMade] = useState(false)
-    const [madeList, setMadeList] = useState([])
     const [areEditing, setAreEditing] = useState(false);
 
     const [error, setError] = useState("");
@@ -40,6 +38,7 @@ export default function RecipeView(props) {
     const[dltText, setDltText] = useState("Delete Recipe");
     const[servingCount, setServingCount] = useState(1);
     const [comments, setComments] = useState([]);
+    let [made, setMade] = useState(false);
 
     async function getIngredients() {
         //const recipeCollection = "CreatedRecipes";
@@ -65,6 +64,7 @@ export default function RecipeView(props) {
             const imageLink = recipeSnapshot.data()["image"];
             const sharedUsers = recipeSnapshot.data()["shared"];
             const comment = recipeSnapshot.data()["comments"];
+
             setRecipeName(name);
             setCoreIngredients(core);
             setSideIngredients(side);
@@ -87,7 +87,13 @@ export default function RecipeView(props) {
 
     }
 
+    async function getMade() {
+        let recipeSnapshot = await getDoc(doc(db, "Recipes", props.id));
+        setMade(recipeSnapshot.data()["madeList"].includes(uid));
+    }
+
     useEffect(()=>{
+        getMade();
         getIngredients().then(r => {});
     }, []);
 
@@ -196,12 +202,14 @@ export default function RecipeView(props) {
     }
 
     async function performMade() {
-        setMade(!made)
-        if (made) {
+
+        console.log(!made);
+        if (!made) {
             await updateDoc(doc(db, "Recipes", props.id), { madeList: arrayUnion(uid) });
         } else {
             await updateDoc(doc(db, "Recipes", props.id), { madeList: arrayRemove(uid) });
         }
+        setMade(!made);
     }
 
     async function deleteRecipe() {
