@@ -507,7 +507,7 @@ export default function CreateRecipeView(props) {
                             boxShadow: "0px 0px 13px #aaaaaa", align: "center", float: "center", display: "block",
                             width: "100%", height: "100%", overflowY: "auto", position: "fixed", top: "0", left: "0"}}>
                             <div>{React.createElement(RecipePreview,
-                                {id: props.id, coreIngredientsNames: coreIngredientNames, sideIngredientsNames: sideIngredientNames,
+                                {id: props.id, name: recipeName, coreIngredientsNames: coreIngredientNames, sideIngredientsNames: sideIngredientNames,
                                     coreIngredientsQuantities: coreIngredientQuantities, sideIngredientsQuantities: sideIngredientQuantities,
                                     instructions: instructions, tags: tags.split(',').map(tag => tag.trim()), blurb: notes,
                                     author: uid, image: image})}</div>

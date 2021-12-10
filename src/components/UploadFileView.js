@@ -37,6 +37,7 @@ export default function UploadFileView() {
 	}
 
 	function handleSubmission() {
+		document.getElementById("input").value = null;
 		const reader = new FileReader()
 		reader.onload = getCSVString
 		reader.readAsText(selectedFile)
