@@ -1,44 +1,32 @@
-# SETUP
-1. Download Webstorm: https://www.jetbrains.com/webstorm/download/
-2. Download the latest version of Node: https://nodejs.org/en/download/
-3. Clone the repo and open in WebStorm
-4. Do `npm start` in the project directory to run the project 
----
-# Getting Started with Create React App
+# Appetyte Project
+This project was built using React and Firebase Firestore. Here are some screenshots of the website: 
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Search Page** <br />
+<img src='https://i.imgur.com/ugwhaHL.png' width='500' />
 
-## Available Scripts
+**Create Recipe Page** <br />
+<img src='https://i.imgur.com/0RAp56f.png' width='500' />
 
-In the project directory, you can run:
+**Pantry Page** <br />
+<img src='https://i.imgur.com/6JfeTJc.png' width='500' />
 
-### `npm start`
+**Cookbook Page** <br />
+<img src='https://i.imgur.com/R48ayF1.png' width='500' />
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+**Saved Recipes Page** <br />
+<img src='https://i.imgur.com/Cp7t4tS.png' width='500' />
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+**Profile Page** <br />
+<img src='https://i.imgur.com/M9mFHiX.png' width='500' />
 
-### `npm test`
+**Recipe Upload Page** <br />
+<img src='https://i.imgur.com/JT9Lzkg.png' width='500' />
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+**Viewing a Profile Page** <br />
+<img src='https://i.imgur.com/rtxBbqp.png' width='500' />
 
-### `npm run build`
+**Tag Search Page** <br />
+<img src='https://i.imgur.com/FgPN2Ps.png' width='500' />
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+**Recipe View Page** <br />
+<img src='https://i.imgur.com/aXg3Mkn.png' width='500' />
